@@ -493,7 +493,7 @@ function buildItem(item){
     ? `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider badge-cmhc shrink-0">CMHC</span>` : '';
   const naBtn = `<button class="na-btn${st==='na'?' active':''}" data-na-id="${item.id}" title="${st==='na'?'Mark as applicable':'Mark as Not Applicable'}">${st==='na'?'✕ N/A':'N/A'}</button>`;
   const filesHtml = item.files.length
-    ? `<div class="files-list">${item.files.map(f=>`<span class="file-tag">${esc(f)}</span>`).join('')}</div>` : '';
+    ? `<div class="files-list${state.loaded?'':' hidden'}">${item.files.map(f=>`<span class="file-tag">${esc(f)}</span>`).join('')}</div>` : '';
   const notesHtml = item.notes ? `<p class="note-text">${item.notes}</p>` : '';
   li.innerHTML=`<div class="flex items-start gap-3">${chk}<div class="flex-1">
     <div class="flex flex-wrap items-start gap-2">
@@ -552,6 +552,8 @@ function updateUI(){
   document.getElementById('stat-missing').textContent=missing;
   document.getElementById('progress-bar').style.width=pct+'%';
   document.getElementById('progress-text').textContent=pct+'% Complete';
+  // show/hide file tags based on CSV load state
+  document.querySelectorAll('[data-item-id] .files-list').forEach(el=>el.classList.toggle('hidden',!state.loaded));
   // update section max-heights (content may have changed)
   document.querySelectorAll('.section-body:not(.collapsed)').forEach(b=>{ b.style.maxHeight=b.scrollHeight+'px'; });
 }
