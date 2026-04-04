@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commercial Mortgage Checklist — 1000617518 Ontario Inc</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: { brand: { gold: '#C9A24B', black: '#000000', dark: '#0a0a0a', gray: '#1a1a1a' } }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(15px)} to{opacity:1;transform:translateY(0)} }
+    .animate-fade-in{animation:fadeInUp .8s cubic-bezier(.16,1,.3,1) forwards;opacity:0}
+    .delay-100{animation-delay:100ms}.delay-200{animation-delay:200ms}.delay-300{animation-delay:300ms}
+    .delay-400{animation-delay:400ms}.delay-500{animation-delay:500ms}.delay-600{animation-delay:600ms}
+    .progress-bar-fill{background:linear-gradient(90deg,#C9A24B,#e8c76a);transition:width 1.2s cubic-bezier(.16,1,.3,1)}
+    .status-received{background-color:rgba(34,197,94,.08);border-left:3px solid #22c55e}
+    .status-missing{background-color:rgba(239,68,68,.06);border-left:3px solid #ef4444}
+    .check-received{background-color:#22c55e;border-color:#22c55e}
+    .check-missing{border-color:#ef4444}
+    .badge-received{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+    .badge-missing{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+    .badge-cmhc{background:rgba(255,255,255,.06);color:#9ca3af;border:1px solid rgba(255,255,255,.15)}
+    .files-list{font-size:.72rem;color:#6b7280;margin-top:4px;line-height:1.6}
+    .file-tag{display:inline-block;background:rgba(201,162,75,.08);border:1px solid rgba(201,162,75,.2);color:#a8804a;padding:1px 6px;border-radius:3px;margin:2px 2px 0 0;font-size:.65rem}
+    .note-text{font-size:.72rem;color:#6b7280;margin-top:3px;font-style:italic}
+    .chk{width:.75rem;height:.75rem}
+    .upload-dropzone{border:2px dashed rgba(255,255,255,.15);transition:border-color .2s,background-color .2s}
+    .upload-dropzone.drag-over,.upload-dropzone:hover{border-color:rgba(201,162,75,.5);background-color:rgba(201,162,75,.04)}
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;padding:.75rem 1.25rem;border-radius:.5rem;font-size:.85rem;font-weight:500;max-width:380px;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:fadeInUp .3s cubic-bezier(.16,1,.3,1) forwards;transition:opacity .3s}
+    .toast-success{background:#14532d;color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+    .toast-warning{background:#78350f;color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
+    .chevron-icon{transition:transform .3s}
+    .chevron-icon.open{transform:rotate(180deg)}
+    .section-body{transition:max-height .35s cubic-bezier(.16,1,.3,1),opacity .3s;overflow:hidden;opacity:1}
+    .section-body.collapsed{max-height:0!important;opacity:0}
+    @media print{
+      body,html{background-color:white!important;color:black!important}
+      .print-container{box-shadow:none!important;margin:0!important;max-width:100%!important;background-color:white!important;border:none!important}
+      *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      h1,h2,h3,p,span,div,li{color:black!important}
+      .text-brand-gold{color:#000!important;font-weight:bold!important}
+      .text-gray-400,.text-gray-300{color:#444!important}
+      .animate-fade-in{animation:none!important;opacity:1!important}
+      .status-received{background-color:#f0fdf4!important}
+      .status-missing{background-color:#fef2f2!important}
+      #csv-upload-panel{display:none!important}
+    }
+  </style>
+</head>
+<body class="bg-brand-black font-sans text-white antialiased p-4 md:p-12 min-h-screen">
+<div class="print-container max-w-4xl mx-auto bg-brand-dark shadow-2xl border border-brand-gold/20 rounded-xl p-8 md:p-14 my-4 animate-fade-in">
+
+  <!-- Header -->
+  <div class="border-b border-brand-gold/30 pb-8 mb-10">
+    <div class="text-brand-gold uppercase tracking-[0.2em] text-xs font-bold mb-4">Document Requirements · Status Report</div>
+    <h1 class="text-3xl md:text-4xl font-light text-white leading-tight tracking-tight mb-2">
+      Commercial Mortgage —<br><span class="font-semibold">Document Checklist &amp; Status</span>
+    </h1>
+    <div class="mt-4 flex flex-wrap gap-4 text-sm text-gray-400 font-light">
+      <span><span class="text-gray-500">Borrower:</span> <span class="text-white font-medium">1000617518 Ontario Inc</span> <span class="text-gray-600">(Sergey Burmistrov, principal)</span></span>
+      <span class="text-gray-700">|</span>
+      <span><span class="text-gray-500">Property:</span> <span class="text-white font-medium">25 Templar Dr</span></span>
+      <span class="text-gray-700">|</span>
+      <span><span class="text-gray-500">Date:</span> <span class="text-white font-medium">2026-04-04</span></span>
+    </div>
+  </div>
+
+  <!-- CSV Upload Panel -->
+  <div id="csv-upload-panel" class="mb-10 animate-fade-in delay-100">
+    <div class="bg-brand-gray border border-brand-gold/20 rounded-xl p-6">
+      <div class="text-brand-gold uppercase tracking-[0.15em] text-xs font-bold mb-1">Update Checklist from CSV</div>
+      <p class="text-gray-500 text-xs mb-4">Upload a CSV listing received document filenames to auto-update all item statuses, counts, and the progress bar.</p>
+
+      <div id="dropzone" class="upload-dropzone rounded-lg p-6 text-center cursor-pointer mb-4">
+        <svg class="w-8 h-8 text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+        </svg>
+        <p class="text-gray-500 text-sm mb-3">Drag &amp; drop a CSV file here, or</p>
+        <label class="inline-block cursor-pointer bg-brand-gold hover:bg-yellow-400 text-black font-semibold text-xs px-4 py-2 rounded-lg transition-colors">
+          Choose File
+          <input type="file" id="csv-file-input" accept=".csv,.txt" class="hidden">
+        </label>
+      </div>
+
+      <!-- Status bar — hidden until CSV loaded -->
+      <div id="upload-status" class="hidden">
+        <div class="flex items-center justify-between bg-green-950 border border-green-800/40 rounded-lg px-4 py-3 text-sm">
+          <div class="flex items-center gap-2 min-w-0">
+            <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span id="upload-status-text" class="text-green-300 truncate"></span>
+          </div>
+          <button id="reset-btn" class="text-gray-500 hover:text-red-400 text-xs underline transition-colors ml-4 shrink-0">Clear CSV</button>
+        </div>
+      </div>
+
+      <!-- Help section -->
+      <details class="mt-4">
+        <summary class="text-xs text-gray-600 hover:text-gray-400 cursor-pointer transition-colors select-none">CSV format &amp; GitHub Pages hosting guide ›</summary>
+        <div class="mt-3 pt-3 border-t border-white/5 space-y-5 text-xs text-gray-500">
+          <div>
+            <p class="text-gray-400 font-semibold mb-2">CSV format</p>
+            <p class="mb-2 leading-relaxed">One filename per line. Optional header row (auto-detected). Lines starting with <code class="bg-white/5 px-1 rounded">#</code> are ignored. Matching is case-insensitive.</p>
+            <pre class="bg-black/40 border border-white/10 rounded p-3 text-gray-400 leading-relaxed overflow-x-auto whitespace-pre">filename
+Corporate - Financial Statements - 1000617518 Ontario Inc - 2024.pdf
+Personal - Tax Return - Sergey Burmistrov - 2024.pdf
+Property - Rent Roll - 25 Templar Dr - 2026.pdf</pre>
+          </div>
+          <div>
+            <p class="text-gray-400 font-semibold mb-2">Host on GitHub Pages (free, no build needed)</p>
+            <ol class="list-decimal list-inside space-y-2 leading-relaxed">
+              <li>Create a free account at <span class="text-brand-gold">github.com</span> if you don't have one</li>
+              <li>Click <strong class="text-gray-300">New repository</strong> — set it to <strong class="text-gray-300">Public</strong>, name it e.g. <code class="bg-white/5 px-1 rounded">mortgage-checklist</code></li>
+              <li>Upload this <code class="bg-white/5 px-1 rounded">index.html</code> file to the repository root (drag &amp; drop on the repo page, or use Git)</li>
+              <li>Go to <strong class="text-gray-300">Settings → Pages</strong> in your repository</li>
+              <li>Under <strong class="text-gray-300">Source</strong>, choose <em>Deploy from a branch</em>, select branch <code class="bg-white/5 px-1 rounded">main</code> and folder <code class="bg-white/5 px-1 rounded">/ (root)</code>, then click <strong class="text-gray-300">Save</strong></li>
+              <li>Wait ~1 minute — your site will be live at <code class="bg-white/5 px-1 rounded">https://&lt;username&gt;.github.io/mortgage-checklist/</code></li>
+              <li>Share that URL — anyone can open it in a browser and upload a CSV to update the checklist</li>
+            </ol>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- Progress Stats -->
+  <div class="mb-12 animate-fade-in delay-200">
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <div class="bg-brand-gray border border-brand-gold/10 rounded-lg p-5 text-center">
+        <div class="text-3xl font-bold text-white mb-1" id="stat-total">—</div>
+        <div class="text-xs text-gray-500 uppercase tracking-wider">Total Items</div>
+      </div>
+      <div class="bg-brand-gray border border-green-900/30 rounded-lg p-5 text-center">
+        <div class="text-3xl font-bold text-green-400 mb-1" id="stat-received">—</div>
+        <div class="text-xs text-gray-500 uppercase tracking-wider">Received</div>
+      </div>
+      <div class="bg-brand-gray border border-red-900/30 rounded-lg p-5 text-center">
+        <div class="text-3xl font-bold text-red-400 mb-1" id="stat-missing">—</div>
+        <div class="text-xs text-gray-500 uppercase tracking-wider">Missing</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="flex-1 h-2 bg-brand-gray rounded-full overflow-hidden">
+        <div class="progress-bar-fill h-full rounded-full" id="progress-bar" style="width:0%"></div>
+      </div>
+      <div class="text-brand-gold font-bold text-sm whitespace-nowrap" id="progress-text">—</div>
+    </div>
+  </div>
+
+  <!-- Checklist rendered by JS -->
+  <div id="checklist-container"></div>
+
+  <!-- Footer -->
+  <div class="mt-16 pt-10 border-t border-brand-gold/30 animate-fade-in delay-600">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+      <div>
+        <h3 class="font-bold text-2xl text-brand-gold tracking-tight mb-1">Nish Sivanathan</h3>
+        <p class="text-white font-medium mb-3 tracking-wide text-sm">Mortgage Agent Level 1 <span class="text-brand-gold mx-2">|</span> Director, Commercial Lending</p>
+        <div class="space-y-1 text-sm text-gray-400 font-light">
+          <p class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-brand-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+            416.895.0891
+          </p>
+          <p class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-brand-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            Nish@vinegroup.ca
+          </p>
+          <p class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-brand-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            555 Bloor St. E., Toronto, ON M4W 1J1
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end print-container -->
+
+<script>
+// ─── Data ─────────────────────────────────────────────────────────────────────
+// Each item: id, section, subsection (null if none), name (HTML), notes (HTML|null),
+// files (original-case array for display; matched case-insensitively),
+// defaultStatus ('received'|'missing'), cmhc (bool)
+const CHECKLIST = [
+  // ── SECTION I ─────────────────────────────────────────────────────────────
+  { id:'s1-01', section:'I — Borrower &amp; Guarantor Information', sub:'Net Worth &amp; Financials',
+    name:'Net Worth Statement (signed &amp; dated — all borrowers/guarantors)',
+    notes:'Required for all personal guarantors', files:[], def:'missing', cmhc:false },
+  { id:'s1-02', section:'I — Borrower &amp; Guarantor Information', sub:'Net Worth &amp; Financials',
+    name:'Personal T1 Tax Returns — last 2 years (all personal guarantors)',
+    notes:'T1s for Gorbatiuks not on file; 2023 year also needed',
+    files:['Personal - Tax Return - Sergey Burmistrov - 2024.pdf',
+           'Personal - Tax Return - Tatiana Volos - 2024.pdf'], def:'received', cmhc:false },
+  { id:'s1-03', section:'I — Borrower &amp; Guarantor Information', sub:'Net Worth &amp; Financials',
+    name:'Notice of Assessment — NOA (all personal guarantors)',
+    notes:'NOA for Gorbatiuks not on file; 2023 NOA also needed',
+    files:['Personal - Notice of Assessment - Sergey Burmistrov - 2024.pdf',
+           'Personal - Notice of Assessment - Tatiana Volos - 2024.pdf'], def:'received', cmhc:false },
+  { id:'s1-04', section:'I — Borrower &amp; Guarantor Information', sub:'Net Worth &amp; Financials',
+    name:'Personal/Holding Company Year-End Financials (most recent)',
+    notes:null,
+    files:['Corporate - Financial Statements - 1000617518 Ontario Inc - 2024.pdf'], def:'received', cmhc:false },
+  { id:'s1-05', section:'I — Borrower &amp; Guarantor Information', sub:'Net Worth &amp; Financials',
+    name:'Corporate Financial Statements — 3 years (subject property holding company)',
+    notes:'2023 &amp; 2024 on file; 2025 year-end not yet in renamed file set',
+    files:['Corporate - Financial Statements - 1000617518 Ontario Inc - 2023.pdf',
+           'Corporate - Financial Statements - 1000617518 Ontario Inc - 2024.pdf'], def:'received', cmhc:false },
+  { id:'s1-06', section:'I — Borrower &amp; Guarantor Information', sub:'Identification &amp; Credit',
+    name:'Signed Privacy / Consent Document with Valid ID (all personal guarantors)',
+    notes:"Privacy agreement and driver's licence on file for Burmistrov/Volos; required for all guarantors",
+    files:['Personal - Privacy Agreement - Sergey Burmistrov & Tatiana Volos - 2026-01.pdf',
+           'Personal - ID Document - Sergey Burmistrov - Driver License - 2025-02.jpg',
+           'Personal - ID Document - Sergey Burmistrov - Driver License - 2025-02 - V2.jpg'], def:'received', cmhc:false },
+  { id:'s1-07', section:'I — Borrower &amp; Guarantor Information', sub:'Identification &amp; Credit',
+    name:'Credit Bureau Report (all personal shareholders/guarantors)',
+    notes:'All 4 principals on file',
+    files:['Personal - Credit Report - Sergey Burmistrov - 2026-02.pdf',
+           'Personal - Credit Report - Tatiana Volos - 2026-02.pdf',
+           'Personal - Credit Report - Ievgen Gorbatiuk - 2026-02.pdf',
+           'Personal - Credit Report - Nataliya Gorbatiuk - 2026-02.pdf'], def:'received', cmhc:false },
+  { id:'s1-08', section:'I — Borrower &amp; Guarantor Information', sub:'Identification &amp; Credit',
+    name:'Personal Resume / Short Bio (ownership &amp; real estate management experience)',
+    notes:'Resume for Burmistrov only',
+    files:['Personal - Professional Resume - Sergey Burmistrov - 2026.pdf'], def:'received', cmhc:false },
+  // ── SECTION II ────────────────────────────────────────────────────────────
+  { id:'s2-01', section:'II — Corporate Structure', sub:null,
+    name:'Organizational Chart / Ownership Structure Description', notes:null,
+    files:['Corporate - Organizational Chart - 1000617518 Ontario Inc - 2026.pdf'], def:'received', cmhc:false },
+  { id:'s2-02', section:'II — Corporate Structure', sub:null,
+    name:'Certificate / Articles of Incorporation — all corporate entities', notes:null,
+    files:['Corporate - ID Document - 1000617518 Ontario Inc - 2023-08.pdf',
+           'Corporate - ID Document - 1000617518 Ontario Inc - 2023-08 - V2.pdf'], def:'received', cmhc:false },
+  { id:'s2-03', section:'II — Corporate Structure', sub:null,
+    name:'Proof of Ownership Structure for Corporate Guarantors',
+    notes:'Required if any corporate entities are acting as guarantors',
+    files:[], def:'missing', cmhc:false },
+  // ── SECTION III ───────────────────────────────────────────────────────────
+  { id:'s3-01', section:'III — Property &amp; Performance', sub:'Property Financials',
+    name:'Pro Forma / Projected Income &amp; Expense Statement', notes:null,
+    files:['Property - Financial Projections - 25 Templar Dr - 2025-12.pdf',
+           'Property - Cost Statement - 25 Templar Dr - 2026.pdf'], def:'received', cmhc:false },
+  { id:'s3-02', section:'III — Property &amp; Performance', sub:'Property Financials',
+    name:'3 Years Property-Specific Operating Statements (if available)',
+    notes:'Property-level operating history not found separately from corporate financials',
+    files:[], def:'missing', cmhc:false },
+  { id:'s3-03', section:'III — Property &amp; Performance', sub:'Property Financials',
+    name:'Monthly Vacancy History (if performance questioned)',
+    notes:'Not on file', files:[], def:'missing', cmhc:false },
+  { id:'s3-04', section:'III — Property &amp; Performance', sub:'Property Details',
+    name:'Property Description (units, suite mix, storeys, construction, heating, parking, amenities)',
+    notes:null,
+    files:['Property - Property Description - 25 Templar Dr.pdf'], def:'received', cmhc:false },
+  { id:'s3-05', section:'III — Property &amp; Performance', sub:'Property Details',
+    name:'Rent Roll (tenant names, dates, unit type, rent, occupancy)', notes:null,
+    files:['Property - Rent Roll - 25 Templar Dr - 2026.pdf'], def:'received', cmhc:false },
+  { id:'s3-06', section:'III — Property &amp; Performance', sub:'Property Details',
+    name:'Executed Lease Agreements / Renewals / Amendments',
+    notes:'All 5 units on file',
+    files:['Property - Lease Agreement - 25 Templar Dr - Unit 1 - 2025-05.pdf',
+           'Property - Lease Agreement - 25 Templar Dr - Unit 2 - 2025-05.pdf',
+           'Property - Lease Agreement - 25 Templar Dr - Unit 3 - 2026-04.pdf',
+           'Property - Lease Agreement - 25 Templar Dr - Unit 4 - 2026-03.pdf',
+           'Property - Lease Agreement - 25 Templar Dr - Unit 5 - 2026-01.PDF'], def:'received', cmhc:false },
+  { id:'s3-07', section:'III — Property &amp; Performance', sub:'Property Details',
+    name:'Property Photographs (interior &amp; exterior)',
+    notes:'Not on file', files:[], def:'missing', cmhc:false },
+  { id:'s3-08', section:'III — Property &amp; Performance', sub:'Mortgages &amp; Taxes',
+    name:'Existing Registered Mortgage Documents &amp; Lender Balance Statements',
+    notes:'Renewal, commitment letters, mortgage charge, and full document package on file',
+    files:['Corporate - Mortgage Renewal - 1000617518 Ontario Inc - 2025-08.pdf',
+           'Corporate - Mortgage Commitment - 1000617518 Ontario Inc - 2026-02.pdf',
+           'Corporate - Mortgage Commitment - 1000617518 Ontario Inc - 2026-02 - V2.pdf',
+           'Property - Mortgage Charge - 25 Templar Dr - 2025-05.pdf',
+           'Corporate - Mortgage Documents - 1000617518 Ontario Inc - 2026-03.zip'], def:'received', cmhc:false },
+  { id:'s3-09', section:'III — Property &amp; Performance', sub:'Mortgages &amp; Taxes',
+    name:'Property Tax Bill / Confirmation Taxes are Current', notes:null,
+    files:['Property - Property Tax Bill - 25 Templar Dr - 2025-12.pdf'], def:'received', cmhc:false },
+  { id:'s3-10', section:'III — Property &amp; Performance', sub:'Valuation &amp; Condition',
+    name:'Appraisal Report — AACI Appraiser (income &amp; comparable approach, economic life)',
+    notes:'Confirm CMHC income approach &amp; remaining economic life stated',
+    files:['Property - Appraisal Report - 25 Templar Dr - 2025-08.pdf'], def:'received', cmhc:true },
+  { id:'s3-11', section:'III — Property &amp; Performance', sub:'Valuation &amp; Condition',
+    name:'Title Insurance Policy', notes:null, files:[], def:'missing', cmhc:false },
+  { id:'s3-12', section:'III — Property &amp; Performance', sub:'Valuation &amp; Condition',
+    name:'Phase 1 Environmental Site Assessment (ESA — CSA standard, within 12 months)',
+    notes:'Required prior to closing for CMHC deals', files:[], def:'missing', cmhc:true },
+  // ── SECTION IV ────────────────────────────────────────────────────────────
+  { id:'s4-01', section:'IV — Construction &amp; Compliance', sub:'Improvements',
+    name:'Cost Breakdown / Details of Recent Improvements', notes:null,
+    files:['Property - Cost Statement - 25 Templar Dr - 2026.pdf'], def:'received', cmhc:false },
+  { id:'s4-02', section:'IV — Construction &amp; Compliance', sub:'Improvements',
+    name:'Architectural Plans / Floor Plan Drawings', notes:null,
+    files:['Property - Floor Plans - 25 Templar Dr - 2024-01.pdf',
+           'Property - Floor Plans - 25 Templar Dr - Garden Suite - 2024-08.pdf'], def:'received', cmhc:false },
+  { id:'s4-03', section:'IV — Construction &amp; Compliance', sub:'Improvements',
+    name:'Certificate of Occupancy', notes:null, files:[], def:'missing', cmhc:false },
+  { id:'s4-04', section:'IV — Construction &amp; Compliance', sub:'Improvements',
+    name:'Building Permits (all applicable)',
+    notes:'Building, HVAC, plumbing, drain permits and both permit closures on file',
+    files:['Property - Building Permit - 25 Templar Dr - 2024-01.PDF',
+           'Property - Building Permit - 25 Templar Dr - 2024-01 - V2.PDF',
+           'Property - Building Permit - 25 Templar Dr - HVAC - 2024-01.PDF',
+           'Property - Building Permit - 25 Templar Dr - Plumbing - 2024-04.PDF',
+           'Property - Building Permit - 25 Templar Dr - Drain - 2024-05.PDF',
+           'Property - Permit Closure - 25 Templar Dr - 2025-11.pdf',
+           'Property - Permit Closure - 25 Templar Dr - 2026-01.png'], def:'received', cmhc:false },
+  { id:'s4-05', section:'IV — Construction &amp; Compliance', sub:'Insurance',
+    name:'Commercial General Liability / Business Interruption / Property &amp; Fire Insurance (lender named as first mortgagee &amp; loss payee)',
+    notes:'Confirm lender named as first mortgagee and loss payee on binder',
+    files:['Property - Insurance Policy - 25 Templar Dr - 2025-09.pdf'], def:'received', cmhc:false },
+  // ── SECTION V ─────────────────────────────────────────────────────────────
+  { id:'s5-01', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
+    name:'Loan Application Form', notes:null,
+    files:['Personal - Mortgage Application - Sergey Burmistrov & Tatiana Volos - 2026.pdf',
+           'Personal - Mortgage Application - Sergey Burmistrov & Tatiana Volos (1) - 2026 - V2.pdf',
+           'Personal - Mortgage Application - Nataliya Gorbatiuk & Ievgen Gorbatiuk - 2026-01.pdf'], def:'received', cmhc:false },
+  { id:'s5-02', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
+    name:'Lender Commitment Letter (signed / endorsed on every page)',
+    notes:'Confirm fully endorsed on every page',
+    files:['Corporate - Mortgage Commitment - 1000617518 Ontario Inc - 2026-02.pdf',
+           'Corporate - Mortgage Commitment - 1000617518 Ontario Inc - 2026-02 - V2.pdf'], def:'received', cmhc:false },
+  { id:'s5-03', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
+    name:'Letter of Engagement / Co-Broker Agreement', notes:null,
+    files:['Corporate - Engagement Agreement - 1000617518 Ontario Inc - 2026-02.pdf',
+           'Corporate - Engagement Agreement - 1000617518 Ontario Inc - 2026-02 - V2.pdf',
+           'Corporate - Engagement Agreement - 1000617518 Ontario Inc - 2026-02 - V3.docx'], def:'received', cmhc:false },
+  { id:'s5-04', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
+    name:'Disclosure to Borrower', notes:'Formal disclosure not yet confirmed on file',
+    files:['Corporate - Docusign Summary - Vine Group - 2026-03.pdf'], def:'missing', cmhc:false },
+  { id:'s5-05', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
+    name:'Letter of Direction', notes:null, files:[], def:'missing', cmhc:false },
+  { id:'s5-06', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
+    name:'All Security Executed &amp; Registered', notes:null, files:[], def:'missing', cmhc:false },
+  { id:'s5-07', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
+    name:'Personal Guarantee (all principals)', notes:null, files:[], def:'missing', cmhc:false },
+  { id:'s5-08', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
+    name:'Borrower Information Form (signed)', notes:null, files:[], def:'missing', cmhc:false },
+  { id:'s5-09', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
+    name:"Borrower's Solicitor &amp; Insurance Broker Contact Info", notes:null, files:[], def:'missing', cmhc:false },
+  { id:'s5-10', section:'V — Closing &amp; Lender Documents', sub:'CMHC-Specific',
+    name:'CMHC Portfolio Review Form',
+    notes:'Required if CMHC-insured deal', files:[], def:'missing', cmhc:true },
+  { id:'s5-11', section:'V — Closing &amp; Lender Documents', sub:'CMHC-Specific',
+    name:"MLI Select — Energy Efficiency Report &amp; Engineer's Attestation",
+    notes:"EnerGuide report on file; confirm engineer's attestation included for MLI Select",
+    files:['Property - EnerGuide Rating - 25 Templar Dr - 2023-12.pdf'], def:'received', cmhc:true }
+];
+
+// index for fast lookup
+const ITEM_MAP = new Map(CHECKLIST.map(i => [i.id, i]));
+
+// ─── State ────────────────────────────────────────────────────────────────────
+const state = { files: new Set(), loaded: false };
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const CHECK_SVG = `<svg class="chk text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function itemStatus(item){
+  if(!state.loaded || item.files.length===0) return item.def;
+  return item.files.some(f=>state.files.has(f.toLowerCase())) ? 'received' : 'missing';
+}
+
+function parseCSV(text){
+  text = text.replace(/^\uFEFF/,'');
+  const out = new Set();
+  let first = true;
+  for(const raw of text.split(/\r?\n/)){
+    const line = raw.trim();
+    if(!line || line.startsWith('#')) continue;
+    if(first && !line.includes('.')){ first=false; continue; } // skip header
+    first = false;
+    const low = line.toLowerCase();
+    out.add(low);
+    const base = low.split(/[/\\]/).pop();
+    if(base!==low) out.add(base);
+  }
+  return out;
+}
+
+// ─── Rendering ────────────────────────────────────────────────────────────────
+function renderAll(){
+  const container = document.getElementById('checklist-container');
+  container.innerHTML = '';
+  const sections=[], sMap=new Map();
+  for(const item of CHECKLIST){
+    if(!sMap.has(item.section)){
+      const s={section:item.section,subs:new Map()};
+      sMap.set(item.section,s); sections.push(s);
+    }
+    const s=sMap.get(item.section);
+    const k=item.sub||'__';
+    if(!s.subs.has(k)) s.subs.set(k,[]);
+    s.subs.get(k).push(item);
+  }
+  const delays=['delay-200','delay-300','delay-400','delay-500','delay-600','delay-600'];
+  sections.forEach((sec,idx)=>{
+    const wrap=document.createElement('div');
+    wrap.className=`mb-10 animate-fade-in ${delays[idx]||'delay-600'}`;
+    // Header
+    const hdr=document.createElement('h2');
+    hdr.className='text-sm font-bold text-white border-b border-brand-gold/20 pb-3 mb-5 uppercase tracking-[0.15em] flex items-center justify-between cursor-pointer select-none';
+    hdr.innerHTML=`<span>${sec.section}</span>
+      <svg class="chevron-icon open w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>`;
+    // Body
+    const body=document.createElement('div');
+    const bodyId='sec-body-'+idx;
+    body.id=bodyId; body.className='section-body';
+    // measure height after render for collapse
+    hdr.addEventListener('click',()=>{
+      const collapsed=body.classList.toggle('collapsed');
+      hdr.querySelector('.chevron-icon').classList.toggle('open',!collapsed);
+      if(!collapsed){ body.style.maxHeight=body.scrollHeight+'px'; }
+      else { body.style.maxHeight='0'; }
+    });
+    // Subsections
+    sec.subs.forEach((items,subKey)=>{
+      const sw=document.createElement('div');
+      sw.className='mb-5';
+      if(subKey!=='__'){
+        const sh=document.createElement('div');
+        const isCmhcSub = subKey==='CMHC-Specific';
+        sh.className='text-xs text-brand-gold uppercase tracking-widest mb-3 font-semibold';
+        sh.innerHTML = isCmhcSub
+          ? `${subKey} <span class="text-gray-600 font-normal normal-case">(if applicable)</span>`
+          : subKey;
+        sw.appendChild(sh);
+      }
+      const ul=document.createElement('ul');
+      ul.className='space-y-3';
+      items.forEach(item=>ul.appendChild(buildItem(item)));
+      sw.appendChild(ul);
+      body.appendChild(sw);
+    });
+    wrap.appendChild(hdr);
+    wrap.appendChild(body);
+    container.appendChild(wrap);
+    // set initial max-height (open)
+    requestAnimationFrame(()=>{ body.style.maxHeight=body.scrollHeight+'px'; });
+  });
+}
+
+function buildItem(item){
+  const st=itemStatus(item);
+  const li=document.createElement('li');
+  li.dataset.itemId=item.id;
+  li.dataset.st=st;
+  li.className=`rounded-md px-4 py-3 status-${st}`;
+  const chk = st==='received'
+    ? `<div class="w-4 h-4 rounded-sm check-received shrink-0 mt-0.5 flex items-center justify-center">${CHECK_SVG}</div>`
+    : `<div class="w-4 h-4 rounded-sm border-2 check-missing shrink-0 mt-0.5"></div>`;
+  const badge = st==='received'
+    ? `<span class="status-badge inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider badge-received shrink-0">Received</span>`
+    : `<span class="status-badge inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider badge-missing shrink-0">Missing</span>`;
+  const cmhc = item.cmhc
+    ? `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider badge-cmhc shrink-0">CMHC</span>` : '';
+  const filesHtml = item.files.length
+    ? `<div class="files-list">${item.files.map(f=>`<span class="file-tag">${esc(f)}</span>`).join('')}</div>` : '';
+  const notesHtml = item.notes ? `<p class="note-text">${item.notes}</p>` : '';
+  li.innerHTML=`<div class="flex items-start gap-3">${chk}<div class="flex-1">
+    <div class="flex flex-wrap items-start gap-2">
+      <span class="text-gray-300 text-sm font-light leading-snug flex-1">${item.name}</span>${badge}${cmhc}
+    </div>${filesHtml}${notesHtml}</div></div>`;
+  return li;
+}
+
+// ─── UI Update ────────────────────────────────────────────────────────────────
+function updateUI(){
+  let received=0;
+  document.querySelectorAll('[data-item-id]').forEach(li=>{
+    const item=ITEM_MAP.get(li.dataset.itemId);
+    const newSt=itemStatus(item), oldSt=li.dataset.st;
+    if(newSt!==oldSt){
+      li.classList.replace(`status-${oldSt}`,`status-${newSt}`);
+      li.dataset.st=newSt;
+      // checkbox
+      const chkDiv=li.querySelector('.w-4.h-4.rounded-sm');
+      if(newSt==='received'){
+        chkDiv.className='w-4 h-4 rounded-sm check-received shrink-0 mt-0.5 flex items-center justify-center';
+        chkDiv.innerHTML=CHECK_SVG;
+      } else {
+        chkDiv.className='w-4 h-4 rounded-sm border-2 check-missing shrink-0 mt-0.5';
+        chkDiv.innerHTML='';
+      }
+      // badge
+      const bdg=li.querySelector('.status-badge');
+      if(bdg){ bdg.className=`status-badge inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider badge-${newSt} shrink-0`; bdg.textContent=newSt==='received'?'Received':'Missing'; }
+    }
+    if(newSt==='received') received++;
+  });
+  const total=CHECKLIST.length, missing=total-received, pct=Math.round(received/total*100);
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-received').textContent=received;
+  document.getElementById('stat-missing').textContent=missing;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  document.getElementById('progress-text').textContent=pct+'% Complete';
+  // update section max-heights (content may have changed)
+  document.querySelectorAll('.section-body:not(.collapsed)').forEach(b=>{ b.style.maxHeight=b.scrollHeight+'px'; });
+}
+
+function toast(msg,type='success'){
+  const t=document.createElement('div');
+  t.className=`toast toast-${type}`; t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); },3500);
+}
+
+// ─── CSV Processing ───────────────────────────────────────────────────────────
+function processCSV(text,fname){
+  const parsed=parseCSV(text);
+  if(!parsed.size){ toast('CSV appears empty — no filenames found.','warning'); return; }
+  state.files=parsed; state.loaded=true;
+  updateUI();
+  let matched=0;
+  CHECKLIST.forEach(item=>{ if(item.files.some(f=>state.files.has(f.toLowerCase()))) matched++; });
+  toast(`Loaded ${parsed.size} filename${parsed.size!==1?'s':''} — ${matched} checklist item${matched!==1?'s':''} matched.`,'success');
+  const bar=document.getElementById('upload-status');
+  bar.classList.remove('hidden');
+  document.getElementById('upload-status-text').textContent=`${fname} — ${parsed.size} filenames, ${matched} items matched`;
+}
+
+function resetCSV(){
+  state.files=new Set(); state.loaded=false;
+  updateUI();
+  document.getElementById('upload-status').classList.add('hidden');
+  document.getElementById('csv-file-input').value='';
+  toast('CSV cleared — checklist restored to default statuses.','warning');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  renderAll();
+  updateUI();
+
+  const input=document.getElementById('csv-file-input');
+  const dz=document.getElementById('dropzone');
+
+  input.addEventListener('change',e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=ev=>processCSV(ev.target.result,f.name);
+    r.readAsText(f);
+  });
+
+  document.getElementById('reset-btn').addEventListener('click',resetCSV);
+
+  dz.addEventListener('dragover',e=>{ e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+  dz.addEventListener('drop',e=>{
+    e.preventDefault(); dz.classList.remove('drag-over');
+    const f=e.dataTransfer.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=ev=>processCSV(ev.target.result,f.name);
+    r.readAsText(f);
+  });
+});
+</script>
+</body>
+</html>
