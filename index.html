@@ -208,179 +208,147 @@ Property - Rent Roll - 25 Templar Dr - 2026.pdf</pre>
 
 <script>
 // ─── Data ─────────────────────────────────────────────────────────────────────
-// Each item: id, section, subsection (null if none), name (HTML), notes (HTML|null),
-// files (original-case array for display; matched case-insensitively),
-// defaultStatus ('received'|'missing'), cmhc (bool)
+// Each item: id, section, sub (null if none), name (HTML), notes (HTML|null),
+// patterns (lowercase keyword substrings to match CSV filenames), cmhc (bool)
 const CHECKLIST = [
   // ── SECTION I ─────────────────────────────────────────────────────────────
   { id:'s1-01', section:'I — Borrower &amp; Guarantor Information', sub:'Net Worth &amp; Financials',
     name:'Net Worth Statement (signed &amp; dated — all borrowers/guarantors)',
-    notes:'Required for all personal guarantors', files:[], def:'missing', cmhc:false },
+    notes:'Required for all personal guarantors', patterns:[], cmhc:false },
   { id:'s1-02', section:'I — Borrower &amp; Guarantor Information', sub:'Net Worth &amp; Financials',
     name:'Personal T1 Tax Returns — last 2 years (all personal guarantors)',
     notes:'T1s for Gorbatiuks not on file; 2023 year also needed',
-    files:['Personal - Tax Return - Sergey Burmistrov - 2024.pdf',
-           'Personal - Tax Return - Tatiana Volos - 2024.pdf'], def:'received', cmhc:false },
+    patterns:['personal - tax return'], cmhc:false },
   { id:'s1-03', section:'I — Borrower &amp; Guarantor Information', sub:'Net Worth &amp; Financials',
     name:'Notice of Assessment — NOA (all personal guarantors)',
     notes:'NOA for Gorbatiuks not on file; 2023 NOA also needed',
-    files:['Personal - Notice of Assessment - Sergey Burmistrov - 2024.pdf',
-           'Personal - Notice of Assessment - Tatiana Volos - 2024.pdf'], def:'received', cmhc:false },
+    patterns:['personal - notice of assessment'], cmhc:false },
   { id:'s1-04', section:'I — Borrower &amp; Guarantor Information', sub:'Net Worth &amp; Financials',
     name:'Personal/Holding Company Year-End Financials (most recent)',
-    notes:null,
-    files:['Corporate - Financial Statements - 1000617518 Ontario Inc - 2024.pdf'], def:'received', cmhc:false },
+    notes:null, patterns:[], cmhc:false },
   { id:'s1-05', section:'I — Borrower &amp; Guarantor Information', sub:'Net Worth &amp; Financials',
     name:'Corporate Financial Statements — 3 years (subject property holding company)',
     notes:'2023 &amp; 2024 on file; 2025 year-end not yet in renamed file set',
-    files:['Corporate - Financial Statements - 1000617518 Ontario Inc - 2023.pdf',
-           'Corporate - Financial Statements - 1000617518 Ontario Inc - 2024.pdf'], def:'received', cmhc:false },
+    patterns:['corporate - financial statements'], cmhc:false },
   { id:'s1-06', section:'I — Borrower &amp; Guarantor Information', sub:'Identification &amp; Credit',
     name:'Signed Privacy / Consent Document with Valid ID (all personal guarantors)',
     notes:"Privacy agreement and driver's licence on file for Burmistrov/Volos; required for all guarantors",
-    files:['Personal - Privacy Agreement - Sergey Burmistrov & Tatiana Volos - 2026-01.pdf',
-           'Personal - ID Document - Sergey Burmistrov - Driver License - 2025-02.jpg',
-           'Personal - ID Document - Sergey Burmistrov - Driver License - 2025-02 - V2.jpg'], def:'received', cmhc:false },
+    patterns:['personal - privacy agreement','personal - id document'], cmhc:false },
   { id:'s1-07', section:'I — Borrower &amp; Guarantor Information', sub:'Identification &amp; Credit',
     name:'Credit Bureau Report (all personal shareholders/guarantors)',
     notes:'All 4 principals on file',
-    files:['Personal - Credit Report - Sergey Burmistrov - 2026-02.pdf',
-           'Personal - Credit Report - Tatiana Volos - 2026-02.pdf',
-           'Personal - Credit Report - Ievgen Gorbatiuk - 2026-02.pdf',
-           'Personal - Credit Report - Nataliya Gorbatiuk - 2026-02.pdf'], def:'received', cmhc:false },
+    patterns:['personal - credit report'], cmhc:false },
   { id:'s1-08', section:'I — Borrower &amp; Guarantor Information', sub:'Identification &amp; Credit',
     name:'Personal Resume / Short Bio (ownership &amp; real estate management experience)',
     notes:'Resume for Burmistrov only',
-    files:['Personal - Professional Resume - Sergey Burmistrov - 2026.pdf'], def:'received', cmhc:false },
+    patterns:['personal - professional resume'], cmhc:false },
   // ── SECTION II ────────────────────────────────────────────────────────────
   { id:'s2-01', section:'II — Corporate Structure', sub:null,
     name:'Organizational Chart / Ownership Structure Description', notes:null,
-    files:['Corporate - Organizational Chart - 1000617518 Ontario Inc - 2026.pdf'], def:'received', cmhc:false },
+    patterns:['corporate - organizational chart'], cmhc:false },
   { id:'s2-02', section:'II — Corporate Structure', sub:null,
     name:'Certificate / Articles of Incorporation — all corporate entities', notes:null,
-    files:['Corporate - ID Document - 1000617518 Ontario Inc - 2023-08.pdf',
-           'Corporate - ID Document - 1000617518 Ontario Inc - 2023-08 - V2.pdf'], def:'received', cmhc:false },
+    patterns:['corporate - id document'], cmhc:false },
   { id:'s2-03', section:'II — Corporate Structure', sub:null,
     name:'Proof of Ownership Structure for Corporate Guarantors',
     notes:'Required if any corporate entities are acting as guarantors',
-    files:[], def:'missing', cmhc:false },
+    patterns:[], cmhc:false },
   // ── SECTION III ───────────────────────────────────────────────────────────
   { id:'s3-01', section:'III — Property &amp; Performance', sub:'Property Financials',
     name:'Pro Forma / Projected Income &amp; Expense Statement', notes:null,
-    files:['Property - Financial Projections - 25 Templar Dr - 2025-12.pdf',
-           'Property - Cost Statement - 25 Templar Dr - 2026.pdf'], def:'received', cmhc:false },
+    patterns:['property - financial projections'], cmhc:false },
   { id:'s3-02', section:'III — Property &amp; Performance', sub:'Property Financials',
     name:'3 Years Property-Specific Operating Statements (if available)',
     notes:'Property-level operating history not found separately from corporate financials',
-    files:[], def:'missing', cmhc:false },
+    patterns:[], cmhc:false },
   { id:'s3-03', section:'III — Property &amp; Performance', sub:'Property Financials',
     name:'Monthly Vacancy History (if performance questioned)',
-    notes:'Not on file', files:[], def:'missing', cmhc:false },
+    notes:'Not on file', patterns:[], cmhc:false },
   { id:'s3-04', section:'III — Property &amp; Performance', sub:'Property Details',
     name:'Property Description (units, suite mix, storeys, construction, heating, parking, amenities)',
-    notes:null,
-    files:['Property - Property Description - 25 Templar Dr.pdf'], def:'received', cmhc:false },
+    notes:null, patterns:['property - property description'], cmhc:false },
   { id:'s3-05', section:'III — Property &amp; Performance', sub:'Property Details',
     name:'Rent Roll (tenant names, dates, unit type, rent, occupancy)', notes:null,
-    files:['Property - Rent Roll - 25 Templar Dr - 2026.pdf'], def:'received', cmhc:false },
+    patterns:['property - rent roll'], cmhc:false },
   { id:'s3-06', section:'III — Property &amp; Performance', sub:'Property Details',
     name:'Executed Lease Agreements / Renewals / Amendments',
     notes:'All 5 units on file',
-    files:['Property - Lease Agreement - 25 Templar Dr - Unit 1 - 2025-05.pdf',
-           'Property - Lease Agreement - 25 Templar Dr - Unit 2 - 2025-05.pdf',
-           'Property - Lease Agreement - 25 Templar Dr - Unit 3 - 2026-04.pdf',
-           'Property - Lease Agreement - 25 Templar Dr - Unit 4 - 2026-03.pdf',
-           'Property - Lease Agreement - 25 Templar Dr - Unit 5 - 2026-01.PDF'], def:'received', cmhc:false },
+    patterns:['property - lease agreement'], cmhc:false },
   { id:'s3-07', section:'III — Property &amp; Performance', sub:'Property Details',
     name:'Property Photographs (interior &amp; exterior)',
-    notes:'Not on file', files:[], def:'missing', cmhc:false },
+    notes:'Not on file', patterns:[], cmhc:false },
   { id:'s3-08', section:'III — Property &amp; Performance', sub:'Mortgages &amp; Taxes',
     name:'Existing Registered Mortgage Documents &amp; Lender Balance Statements',
     notes:'Renewal, commitment letters, mortgage charge, and full document package on file',
-    files:['Corporate - Mortgage Renewal - 1000617518 Ontario Inc - 2025-08.pdf',
-           'Corporate - Mortgage Commitment - 1000617518 Ontario Inc - 2026-02.pdf',
-           'Corporate - Mortgage Commitment - 1000617518 Ontario Inc - 2026-02 - V2.pdf',
-           'Property - Mortgage Charge - 25 Templar Dr - 2025-05.pdf',
-           'Corporate - Mortgage Documents - 1000617518 Ontario Inc - 2026-03.zip'], def:'received', cmhc:false },
+    patterns:['corporate - mortgage renewal','property - mortgage charge','corporate - mortgage documents'], cmhc:false },
   { id:'s3-09', section:'III — Property &amp; Performance', sub:'Mortgages &amp; Taxes',
     name:'Property Tax Bill / Confirmation Taxes are Current', notes:null,
-    files:['Property - Property Tax Bill - 25 Templar Dr - 2025-12.pdf'], def:'received', cmhc:false },
+    patterns:['property - property tax bill'], cmhc:false },
   { id:'s3-10', section:'III — Property &amp; Performance', sub:'Valuation &amp; Condition',
     name:'Appraisal Report — AACI Appraiser (income &amp; comparable approach, economic life)',
     notes:'Confirm CMHC income approach &amp; remaining economic life stated',
-    files:['Property - Appraisal Report - 25 Templar Dr - 2025-08.pdf'], def:'received', cmhc:true },
+    patterns:['property - appraisal report'], cmhc:true },
   { id:'s3-11', section:'III — Property &amp; Performance', sub:'Valuation &amp; Condition',
-    name:'Title Insurance Policy', notes:null, files:[], def:'missing', cmhc:false },
+    name:'Title Insurance Policy', notes:null, patterns:[], cmhc:false },
   { id:'s3-12', section:'III — Property &amp; Performance', sub:'Valuation &amp; Condition',
     name:'Phase 1 Environmental Site Assessment (ESA — CSA standard, within 12 months)',
-    notes:'Required prior to closing for CMHC deals', files:[], def:'missing', cmhc:true },
+    notes:'Required prior to closing for CMHC deals', patterns:[], cmhc:true },
   // ── SECTION IV ────────────────────────────────────────────────────────────
   { id:'s4-01', section:'IV — Construction &amp; Compliance', sub:'Improvements',
     name:'Cost Breakdown / Details of Recent Improvements', notes:null,
-    files:['Property - Cost Statement - 25 Templar Dr - 2026.pdf'], def:'received', cmhc:false },
+    patterns:['property - cost statement'], cmhc:false },
   { id:'s4-02', section:'IV — Construction &amp; Compliance', sub:'Improvements',
     name:'Architectural Plans / Floor Plan Drawings', notes:null,
-    files:['Property - Floor Plans - 25 Templar Dr - 2024-01.pdf',
-           'Property - Floor Plans - 25 Templar Dr - Garden Suite - 2024-08.pdf'], def:'received', cmhc:false },
+    patterns:['property - floor plans'], cmhc:false },
   { id:'s4-03', section:'IV — Construction &amp; Compliance', sub:'Improvements',
-    name:'Certificate of Occupancy', notes:null, files:[], def:'missing', cmhc:false },
+    name:'Certificate of Occupancy', notes:null, patterns:[], cmhc:false },
   { id:'s4-04', section:'IV — Construction &amp; Compliance', sub:'Improvements',
     name:'Building Permits (all applicable)',
     notes:'Building, HVAC, plumbing, drain permits and both permit closures on file',
-    files:['Property - Building Permit - 25 Templar Dr - 2024-01.PDF',
-           'Property - Building Permit - 25 Templar Dr - 2024-01 - V2.PDF',
-           'Property - Building Permit - 25 Templar Dr - HVAC - 2024-01.PDF',
-           'Property - Building Permit - 25 Templar Dr - Plumbing - 2024-04.PDF',
-           'Property - Building Permit - 25 Templar Dr - Drain - 2024-05.PDF',
-           'Property - Permit Closure - 25 Templar Dr - 2025-11.pdf',
-           'Property - Permit Closure - 25 Templar Dr - 2026-01.png'], def:'received', cmhc:false },
+    patterns:['property - building permit','property - permit closure'], cmhc:false },
   { id:'s4-05', section:'IV — Construction &amp; Compliance', sub:'Insurance',
     name:'Commercial General Liability / Business Interruption / Property &amp; Fire Insurance (lender named as first mortgagee &amp; loss payee)',
     notes:'Confirm lender named as first mortgagee and loss payee on binder',
-    files:['Property - Insurance Policy - 25 Templar Dr - 2025-09.pdf'], def:'received', cmhc:false },
+    patterns:['property - insurance policy'], cmhc:false },
   // ── SECTION V ─────────────────────────────────────────────────────────────
   { id:'s5-01', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
     name:'Loan Application Form', notes:null,
-    files:['Personal - Mortgage Application - Sergey Burmistrov & Tatiana Volos - 2026.pdf',
-           'Personal - Mortgage Application - Sergey Burmistrov & Tatiana Volos (1) - 2026 - V2.pdf',
-           'Personal - Mortgage Application - Nataliya Gorbatiuk & Ievgen Gorbatiuk - 2026-01.pdf'], def:'received', cmhc:false },
+    patterns:['personal - mortgage application'], cmhc:false },
   { id:'s5-02', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
     name:'Lender Commitment Letter (signed / endorsed on every page)',
     notes:'Confirm fully endorsed on every page',
-    files:['Corporate - Mortgage Commitment - 1000617518 Ontario Inc - 2026-02.pdf',
-           'Corporate - Mortgage Commitment - 1000617518 Ontario Inc - 2026-02 - V2.pdf'], def:'received', cmhc:false },
+    patterns:['corporate - mortgage commitment'], cmhc:false },
   { id:'s5-03', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
     name:'Letter of Engagement / Co-Broker Agreement', notes:null,
-    files:['Corporate - Engagement Agreement - 1000617518 Ontario Inc - 2026-02.pdf',
-           'Corporate - Engagement Agreement - 1000617518 Ontario Inc - 2026-02 - V2.pdf',
-           'Corporate - Engagement Agreement - 1000617518 Ontario Inc - 2026-02 - V3.docx'], def:'received', cmhc:false },
+    patterns:['corporate - engagement agreement'], cmhc:false },
   { id:'s5-04', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
     name:'Disclosure to Borrower', notes:'Formal disclosure not yet confirmed on file',
-    files:['Corporate - Docusign Summary - Vine Group - 2026-03.pdf'], def:'missing', cmhc:false },
+    patterns:['corporate - docusign summary'], cmhc:false },
   { id:'s5-05', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
-    name:'Letter of Direction', notes:null, files:[], def:'missing', cmhc:false },
+    name:'Letter of Direction', notes:null, patterns:[], cmhc:false },
   { id:'s5-06', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
-    name:'All Security Executed &amp; Registered', notes:null, files:[], def:'missing', cmhc:false },
+    name:'All Security Executed &amp; Registered', notes:null, patterns:[], cmhc:false },
   { id:'s5-07', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
-    name:'Personal Guarantee (all principals)', notes:null, files:[], def:'missing', cmhc:false },
+    name:'Personal Guarantee (all principals)', notes:null, patterns:[], cmhc:false },
   { id:'s5-08', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
-    name:'Borrower Information Form (signed)', notes:null, files:[], def:'missing', cmhc:false },
+    name:'Borrower Information Form (signed)', notes:null, patterns:[], cmhc:false },
   { id:'s5-09', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
-    name:"Borrower's Solicitor &amp; Insurance Broker Contact Info", notes:null, files:[], def:'missing', cmhc:false },
+    name:"Borrower's Solicitor &amp; Insurance Broker Contact Info", notes:null, patterns:[], cmhc:false },
   { id:'s5-10', section:'V — Closing &amp; Lender Documents', sub:'CMHC-Specific',
     name:'CMHC Portfolio Review Form',
-    notes:'Required if CMHC-insured deal', files:[], def:'missing', cmhc:true },
+    notes:'Required if CMHC-insured deal', patterns:[], cmhc:true },
   { id:'s5-11', section:'V — Closing &amp; Lender Documents', sub:'CMHC-Specific',
     name:"MLI Select — Energy Efficiency Report &amp; Engineer's Attestation",
     notes:"EnerGuide report on file; confirm engineer's attestation included for MLI Select",
-    files:['Property - EnerGuide Rating - 25 Templar Dr - 2023-12.pdf'], def:'received', cmhc:true }
+    patterns:['property - energuide rating'], cmhc:true }
 ];
 
 // index for fast lookup
 const ITEM_MAP = new Map(CHECKLIST.map(i => [i.id, i]));
 
 // ─── State ────────────────────────────────────────────────────────────────────
-const state = { files: new Set(), loaded: false, na: new Set(), hideNa: false };
+// itemFiles: Map<itemId, string[]> — original-case filenames matched from CSV
+const state = { itemFiles: new Map(), loaded: false, na: new Set(), hideNa: false };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const CHECK_SVG = `<svg class="chk text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
@@ -389,13 +357,13 @@ function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/
 
 function itemStatus(item){
   if(state.na.has(item.id)) return 'na';
-  if(!state.loaded || item.files.length===0) return 'missing';
-  return item.files.some(f=>state.files.has(f.toLowerCase())) ? 'received' : 'missing';
+  if(!state.loaded) return 'missing';
+  return (state.itemFiles.get(item.id)||[]).length > 0 ? 'received' : 'missing';
 }
 
 function parseCSV(text){
   text = text.replace(/^\uFEFF/,'');
-  const out = new Set();
+  const out = new Map();
   let first = true;
   for(const raw of text.split(/\r?\n/)){
     const line = raw.trim();
@@ -403,9 +371,9 @@ function parseCSV(text){
     if(first && !line.includes('.')){ first=false; continue; } // skip header
     first = false;
     const low = line.toLowerCase();
-    out.add(low);
+    if(!out.has(low)) out.set(low, line);
     const base = low.split(/[/\\]/).pop();
-    if(base!==low) out.add(base);
+    if(base!==low && !out.has(base)) out.set(base, line);
   }
   return out;
 }
@@ -492,8 +460,7 @@ function buildItem(item){
   const cmhc = item.cmhc
     ? `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider badge-cmhc shrink-0">CMHC</span>` : '';
   const naBtn = `<button class="na-btn${st==='na'?' active':''}" data-na-id="${item.id}" title="${st==='na'?'Mark as applicable':'Mark as Not Applicable'}">${st==='na'?'✕ N/A':'N/A'}</button>`;
-  const filesHtml = item.files.length
-    ? `<div class="files-list${state.loaded?'':' hidden'}">${item.files.map(f=>`<span class="file-tag">${esc(f)}</span>`).join('')}</div>` : '';
+  const filesHtml = `<div class="files-list"></div>`;
   const notesHtml = item.notes ? `<p class="note-text">${item.notes}</p>` : '';
   li.innerHTML=`<div class="flex items-start gap-3">${chk}<div class="flex-1">
     <div class="flex flex-wrap items-start gap-2">
@@ -536,6 +503,13 @@ function updateUI(){
         naBtn.title = newSt==='na' ? 'Mark as applicable' : 'Mark as Not Applicable';
       }
     }
+    // populate file tags from state.itemFiles
+    const filesDiv = li.querySelector('.files-list');
+    if(filesDiv){
+      const itemFileList = state.itemFiles.get(item.id) || [];
+      filesDiv.innerHTML = itemFileList.length > 0
+        ? itemFileList.map(f=>`<span class="file-tag">${esc(f)}</span>`).join('') : '';
+    }
     // visibility & counting
     if(newSt==='na'){
       naCount++;
@@ -552,8 +526,6 @@ function updateUI(){
   document.getElementById('stat-missing').textContent=missing;
   document.getElementById('progress-bar').style.width=pct+'%';
   document.getElementById('progress-text').textContent=pct+'% Complete';
-  // show/hide file tags based on CSV load state
-  document.querySelectorAll('[data-item-id] .files-list').forEach(el=>el.classList.toggle('hidden',!state.loaded));
   // update section max-heights (content may have changed)
   document.querySelectorAll('.section-body:not(.collapsed)').forEach(b=>{ b.style.maxHeight=b.scrollHeight+'px'; });
 }
@@ -574,26 +546,50 @@ function toast(msg,type='success'){
 function processCSV(text,fname){
   const parsed=parseCSV(text);
   if(!parsed.size){ toast('CSV appears empty — no filenames found.','warning'); return; }
-  state.files=parsed; state.loaded=true;
+
+  // Initialize empty arrays for all items
+  const newItemFiles=new Map();
+  CHECKLIST.forEach(item=>newItemFiles.set(item.id,[]));
+
+  let fileCount=0, unmatched=0;
+  for(const [low,orig] of parsed){
+    // skip path duplicates; use basenames only (no slash in key)
+    if(low.includes('/')||low.includes('\\')) continue;
+    fileCount++;
+    let found=false;
+    for(const item of CHECKLIST){
+      if(item.patterns.some(p=>low.includes(p))){
+        newItemFiles.get(item.id).push(orig);
+        found=true;
+        break;
+      }
+    }
+    if(!found) unmatched++;
+  }
+
+  state.itemFiles=newItemFiles; state.loaded=true;
   updateUI();
-  let matched=0;
-  CHECKLIST.forEach(item=>{ if(item.files.some(f=>state.files.has(f.toLowerCase()))) matched++; });
-  toast(`Loaded ${parsed.size} filename${parsed.size!==1?'s':''} — ${matched} checklist item${matched!==1?'s':''} matched.`,'success');
-  const bar=document.getElementById('upload-status');
-  bar.classList.remove('hidden');
-  document.getElementById('upload-status-text').textContent=`${fname} — ${parsed.size} filenames, ${matched} items matched`;
+
+  const itemsMatched=CHECKLIST.filter(item=>newItemFiles.get(item.id).length>0).length;
+  toast(
+    `${fileCount} file${fileCount!==1?'s':''} loaded — ${itemsMatched} item${itemsMatched!==1?'s':''} matched`+
+    (unmatched>0?`, ${unmatched} unmatched`:''),
+    unmatched>0?'warning':'success'
+  );
+  document.getElementById('upload-status').classList.remove('hidden');
+  document.getElementById('upload-status-text').textContent=`${fname} — ${fileCount} files, ${itemsMatched} items matched`;
 }
 
 function resetCSV(){
-  state.files=new Set(); state.loaded=false;
+  state.itemFiles=new Map(); state.loaded=false;
   updateUI();
   document.getElementById('upload-status').classList.add('hidden');
   document.getElementById('csv-file-input').value='';
-  toast('CSV cleared — statuses restored to defaults.','warning');
+  toast('CSV cleared.','warning');
 }
 
 function resetAll(){
-  state.files=new Set(); state.loaded=false; state.na=new Set(); state.hideNa=false;
+  state.itemFiles=new Map(); state.loaded=false; state.na=new Set(); state.hideNa=false;
   document.getElementById('upload-status').classList.add('hidden');
   document.getElementById('csv-file-input').value='';
   document.getElementById('hide-na-toggle').checked=false;
