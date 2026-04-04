@@ -389,7 +389,7 @@ function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/
 
 function itemStatus(item){
   if(state.na.has(item.id)) return 'na';
-  if(!state.loaded || item.files.length===0) return item.def;
+  if(!state.loaded || item.files.length===0) return 'missing';
   return item.files.some(f=>state.files.has(f.toLowerCase())) ? 'received' : 'missing';
 }
 
