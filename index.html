@@ -243,8 +243,9 @@ const CHECKLIST = [
   { id:'s1-06', section:'I — Borrower &amp; Guarantor Information', sub:'Identification &amp; Credit',
     name:'Signed Privacy / Consent Document with Valid ID (all personal guarantors)',
     notes:"Privacy agreement and driver's licence on file for Burmistrov/Volos; required for all guarantors",
-    patterns:['personal - privacy agreement','personal - id document','personal - privacy',
-              'personal - consent','personal - identification','personal - driver',
+    patterns:['personal - privacy agreement','corporate - privacy agreement',
+              'personal - id document','personal - privacy','personal - consent',
+              'personal - identification','personal - driver',
               'personal - passport','personal - sin card'], cmhc:false },
   { id:'s1-07', section:'I — Borrower &amp; Guarantor Information', sub:'Identification &amp; Credit',
     name:'Credit Bureau Report (all personal shareholders/guarantors)',
@@ -276,7 +277,8 @@ const CHECKLIST = [
     name:'Pro Forma / Projected Income &amp; Expense Statement', notes:null,
     patterns:['property - financial projections','property - pro forma',
               'property - income projection','property - projected income',
-              'property - proforma'], cmhc:false },
+              'property - proforma','corporate - financial projections',
+              'corporate - pro forma'], cmhc:false },
   { id:'s3-02', section:'III — Property &amp; Performance', sub:'Property Financials',
     name:'3 Years Property-Specific Operating Statements (if available)',
     notes:'Property-level operating history not found separately from corporate financials',
@@ -357,7 +359,8 @@ const CHECKLIST = [
   { id:'s5-01', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
     name:'Loan Application Form', notes:null,
     patterns:['personal - mortgage application','corporate - mortgage application',
-              'personal - loan application','corporate - loan application'], cmhc:false },
+              'property - mortgage application','personal - loan application',
+              'corporate - loan application'], cmhc:false },
   { id:'s5-02', section:'V — Closing &amp; Lender Documents', sub:'Lender Documents',
     name:'Lender Commitment Letter (signed / endorsed on every page)',
     notes:'Confirm fully endorsed on every page',
@@ -424,18 +427,32 @@ function parseCSV(text){
   text = text.replace(/^\uFEFF/,'');
   const out = new Map();
   let first = true;
-  let twoCol = null; // null=undetected; true=two-column AI rename CSV; false=single-column
+  let sep = null; // null=undetected; 'tab', 'comma', or false=single-column
   for(const raw of text.split(/\r?\n/)){
     const line = raw.trim();
     if(!line || line.startsWith('#')) continue;
-    if(first && !line.includes('.')){ first=false; continue; } // skip header row
+    if(first && !line.includes('.') && !line.includes('\t')){ first=false; continue; } // skip header
     first = false;
-    // Auto-detect two-column AI rename CSV (format: "Current File Name,New File Name")
-    if(twoCol === null){
-      const ci = line.lastIndexOf(',');
-      twoCol = ci > 0 && line.slice(ci+1).trim().includes('.');
+    // Auto-detect two-column AI rename CSV
+    // Supports: tab-separated (most AI tools) or comma-separated with extension in second col
+    if(sep === null){
+      if(line.includes('\t')){
+        sep = 'tab';
+      } else {
+        const ci = line.lastIndexOf(',');
+        sep = (ci > 0 && line.slice(ci+1).trim().includes('.')) ? 'comma' : false;
+      }
     }
-    const fname = (twoCol ? line.slice(line.lastIndexOf(',')+1) : line).trim();
+    let fname;
+    if(sep === 'tab'){
+      const ti = line.indexOf('\t');
+      fname = line.slice(ti+1).trim();
+    } else if(sep === 'comma'){
+      fname = line.slice(line.lastIndexOf(',')+1).trim();
+    } else {
+      fname = line;
+    }
+    if(!fname) continue; // skip rows where new filename column is empty
     const low = fname.toLowerCase();
     if(!out.has(low)) out.set(low, fname);
     const base = low.split(/[/\\]/).pop();
