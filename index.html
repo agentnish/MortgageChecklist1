@@ -416,7 +416,7 @@ const ITEM_MAP = new Map(CHECKLIST.map(i => [i.id, i]));
 // itemFiles: Map<itemId, string[]> — original-case filenames matched from CSV
 // dealInfo: extracted from CSV naming convention (Category - Title - PrimaryName - ...)
 const state = { itemFiles: new Map(), loaded: false, na: new Set(), hideNa: false,
-                dealInfo: { company:'', principal:'', property:'' } };
+                dealInfo: { company:'', principal:'', property:'' }, fileCount: 0 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const CHECK_SVG = `<svg class="chk text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
@@ -687,7 +687,7 @@ function processCSV(text,fname){
     if(!found) unmatched++;
   }
 
-  state.itemFiles=newItemFiles; state.loaded=true;
+  state.itemFiles=newItemFiles; state.loaded=true; state.fileCount=fileCount;
   applyDealInfo(extractDealInfo(parsed));
   updateUI();
 
@@ -702,7 +702,7 @@ function processCSV(text,fname){
 }
 
 function resetCSV(){
-  state.itemFiles=new Map(); state.loaded=false;
+  state.itemFiles=new Map(); state.loaded=false; state.fileCount=0;
   applyDealInfo({company:'',principal:'',property:''});
   updateUI();
   document.getElementById('upload-status').classList.add('hidden');
@@ -711,7 +711,7 @@ function resetCSV(){
 }
 
 function resetAll(){
-  state.itemFiles=new Map(); state.loaded=false; state.na=new Set(); state.hideNa=false;
+  state.itemFiles=new Map(); state.loaded=false; state.na=new Set(); state.hideNa=false; state.fileCount=0;
   applyDealInfo({company:'',principal:'',property:''});
   document.getElementById('upload-status').classList.add('hidden');
   document.getElementById('csv-file-input').value='';
@@ -835,7 +835,12 @@ tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']},colors:
 
   <!-- Stats -->
   <div class="mb-12">
-    <div class="grid grid-cols-3 gap-4 mb-6">
+    ${forLender
+      ? `<div class="bg-brand-gray border border-brand-gold/10 rounded-lg p-5 text-center inline-block min-w-[180px]">
+      <div class="text-3xl font-bold text-white mb-1">${state.fileCount}</div>
+      <div class="text-xs text-gray-500 uppercase tracking-wider">Total Files</div>
+    </div>`
+      : `<div class="grid grid-cols-3 gap-4 mb-6">
       <div class="bg-brand-gray border border-brand-gold/10 rounded-lg p-5 text-center">
         <div class="text-3xl font-bold text-white mb-1">${total}</div>
         <div class="text-xs text-gray-500 uppercase tracking-wider">Total Items</div>
@@ -854,7 +859,8 @@ tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']},colors:
         <div class="progress-bar-fill h-full rounded-full" style="width:${pct}%"></div>
       </div>
       <div class="text-brand-gold font-bold text-sm whitespace-nowrap">${pct}% Complete</div>
-    </div>
+    </div>`
+    }
   </div>
 
   <!-- Checklist -->
