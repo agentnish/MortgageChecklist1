@@ -48,6 +48,9 @@
     .status-na{background-color:rgba(255,255,255,.02);border-left:3px solid #374151;opacity:.4}
     .badge-na{background:rgba(255,255,255,.05);color:#6b7280;border:1px solid rgba(255,255,255,.1)}
     .na-btn{font-size:.6rem;color:#374151;border:1px solid #374151;padding:1px 5px;border-radius:3px;cursor:pointer;line-height:1.6;transition:color .15s,border-color .15s;white-space:nowrap;background:transparent}
+    #hdr-company[contenteditable]{cursor:text;outline:none;border-bottom:1px solid transparent;transition:border-color .15s}
+    #hdr-company[contenteditable]:hover{border-bottom-color:#4b5563}
+    #hdr-company[contenteditable]:focus{border-bottom-color:#d4a017}
     .na-btn:hover{color:#9ca3af;border-color:#6b7280}
     .na-btn.active{color:#6b7280;border-color:#4b5563}
     @media print{
@@ -75,7 +78,7 @@
       Commercial Mortgage —<br><span class="font-semibold">Document Checklist &amp; Status</span>
     </h1>
     <div class="mt-4 flex flex-wrap gap-4 text-sm text-gray-400 font-light">
-      <span><span class="text-gray-500">Borrower:</span> <span id="hdr-company" class="text-gray-600 italic">Upload CSV</span> <span id="hdr-principal" class="text-gray-600"></span></span>
+      <span><span class="text-gray-500">Borrower:</span> <span id="hdr-company" class="text-gray-600 italic" contenteditable="true" spellcheck="false" title="Click to edit">Upload CSV</span> <span id="hdr-principal" class="text-gray-600"></span></span>
       <span class="text-gray-700">|</span>
       <span><span class="text-gray-500">Property:</span> <span id="hdr-property" class="text-gray-600 italic">Upload CSV</span></span>
       <span class="text-gray-700">|</span>
@@ -935,6 +938,17 @@ document.addEventListener('DOMContentLoaded',()=>{
     const r=new FileReader();
     r.onload=ev=>processCSV(ev.target.result,f.name);
     r.readAsText(f);
+  });
+
+  // Editable company name in header
+  const companyEl = document.getElementById('hdr-company');
+  companyEl.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); companyEl.blur(); } });
+  companyEl.addEventListener('blur', () => {
+    const val = companyEl.textContent.trim();
+    state.dealInfo.company = val;
+    companyEl.className = val ? 'text-white font-medium' : 'text-gray-600 italic';
+    if(!val) companyEl.textContent = 'Upload CSV';
+    document.title = val ? `Commercial Mortgage Checklist — ${val}` : 'Commercial Mortgage Checklist';
   });
 
   document.getElementById('reset-btn').addEventListener('click',resetCSV);
