@@ -727,13 +727,46 @@ function exportHTML(){
   function unesc(s){ return (s||'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/&#39;/g,"'"); }
   function hesc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-  // ── Stats ────────────────────────────────────────────────────────────────
+  // ── Stats ───────────────────────────────────────────────────────────────
   let rcvd=0, naCount=0;
   CHECKLIST.forEach(item=>{ const s=itemStatus(item); if(s==='na') naCount++; else if(s==='received') rcvd++; });
   const total=CHECKLIST.length-naCount, miss=total-rcvd;
   const pct=total>0?Math.round(rcvd/total*100):0;
 
-  // ── Group sections ───────────────────────────────────────────────────────
+  // ── Reuse live CSS (guarantees pixel-perfect match) ─────────────────────
+  const customCSS = document.querySelector('style').textContent;
+
+  // ── SVG constants matching buildItem() ──────────────────────────────────
+  const CHECK_SVG=`<svg class="chk text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
+
+  // ── Build item HTML — identical class structure to buildItem() ───────────
+  function buildStaticItem(item){
+    const st=itemStatus(item);
+    if(st==='na') return '';
+    const rcv=st==='received';
+    const files=state.itemFiles.get(item.id)||[];
+    const chk=rcv
+      ? `<div class="w-4 h-4 rounded-sm check-received shrink-0 mt-0.5 flex items-center justify-center">${CHECK_SVG}</div>`
+      : `<div class="w-4 h-4 rounded-sm border-2 check-missing shrink-0 mt-0.5"></div>`;
+    const badge=`<span class="status-badge inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider badge-${st} shrink-0">${rcv?'Received':'Missing'}</span>`;
+    const cmhc=item.cmhc?`<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider badge-cmhc shrink-0">CMHC</span>`:'';
+    const fileTags=files.length?`<div class="files-list">${files.map(f=>`<span class="file-tag">${hesc(f)}</span>`).join('')}</div>`:'';
+    const notes=item.notes?`<p class="note-text">${hesc(unesc(item.notes))}</p>`:'';
+    return `<li class="rounded-md px-4 py-3 status-${st}">
+  <div class="flex items-start gap-3">
+    ${chk}
+    <div class="flex-1">
+      <div class="flex flex-wrap items-start gap-2">
+        <span class="text-gray-300 text-sm font-light leading-snug flex-1">${hesc(unesc(item.name))}</span>
+        ${badge}${cmhc}
+      </div>
+      ${fileTags}${notes}
+    </div>
+  </div>
+</li>`;
+  }
+
+  // ── Group sections — same logic as renderAll() ───────────────────────────
   const sections=[], sMap=new Map();
   for(const item of CHECKLIST){
     if(!sMap.has(item.section)){ const s={section:item.section,subs:new Map()}; sMap.set(item.section,s); sections.push(s); }
@@ -742,116 +775,94 @@ function exportHTML(){
     s.subs.get(k).push(item);
   }
 
-  // ── Build checklist HTML ─────────────────────────────────────────────────
   let checklistHtml='';
   for(const sec of sections){
     const secItems=[...sec.subs.values()].flat().filter(i=>itemStatus(i)!=='na');
     if(!secItems.length) continue;
-    checklistHtml+=`<div class="section"><div class="sec-hdr">${hesc(unesc(sec.section))}</div>`;
+    let subsHtml='';
     for(const [sub,items] of sec.subs){
       const vis=items.filter(i=>itemStatus(i)!=='na');
       if(!vis.length) continue;
-      if(sub!=='__') checklistHtml+=`<div class="sub-hdr">${hesc(unesc(sub))}</div>`;
-      for(const item of vis){
-        const st=itemStatus(item);
-        const rcv=st==='received';
-        const files=state.itemFiles.get(item.id)||[];
-        const fileTags=rcv&&files.length?`<div class="file-tags">${files.map(f=>`<span class="file-tag">${hesc(f)}</span>`).join('')}</div>`:'';
-        const notes=item.notes?`<p class="notes">${hesc(unesc(item.notes))}</p>`:'';
-        const cmhc=item.cmhc?`<span class="cmhc">CMHC</span>`:'';
-        checklistHtml+=`<div class="item ${rcv?'rcv':'miss'}">
-  <div class="icon">${rcv?'✓':'–'}</div>
-  <div class="details"><span class="iname">${hesc(unesc(item.name))}</span>${cmhc}${notes}${fileTags}</div>
-  <div class="badge ${rcv?'badge-r':'badge-m'}">${rcv?'Received':'Missing'}</div>
-</div>`;
-      }
+      const subHdr=sub!=='__'?`<div class="text-xs text-brand-gold uppercase tracking-widest mb-3 font-semibold">${hesc(unesc(sub))}</div>`:'';
+      subsHtml+=`${subHdr}<ul class="space-y-3 mb-6">${vis.map(buildStaticItem).join('')}</ul>`;
     }
-    checklistHtml+=`</div>`;
+    checklistHtml+=`<div class="mb-8">
+  <h2 class="text-sm font-bold text-white border-b border-brand-gold/20 pb-3 mb-5 uppercase tracking-[0.15em]">${hesc(unesc(sec.section))}</h2>
+  ${subsHtml}
+</div>`;
   }
 
-  // ── Meta strings ─────────────────────────────────────────────────────────
-  const borrowerMeta = companyLabel
-    ? `<span><span class="lbl">Borrower:</span> <span class="val">${hesc(companyLabel)}</span>${principalLabel?` <span class="dim">(${hesc(principalLabel)}, principal)</span>`:''}</span><span class="pipe">|</span>`
-    : '';
-  const propertyMeta = propertyLabel
-    ? `<span><span class="lbl">Property:</span> <span class="val">${hesc(propertyLabel)}</span></span><span class="pipe">|</span>`
-    : '';
+  // ── Header meta row ──────────────────────────────────────────────────────
+  const borrowerMeta=companyLabel
+    ? `<span><span class="text-gray-500">Borrower:</span> <span class="text-white font-medium">${hesc(companyLabel)}</span>${principalLabel?` <span class="text-gray-400">(${hesc(principalLabel)}, principal)</span>`:''}</span><span class="text-gray-700">|</span>`:'';
+  const propertyMeta=propertyLabel
+    ? `<span><span class="text-gray-500">Property:</span> <span class="text-white font-medium">${hesc(propertyLabel)}</span></span><span class="text-gray-700">|</span>`:'';
 
-  // ── Full HTML ─────────────────────────────────────────────────────────────
+  // ── Full HTML ────────────────────────────────────────────────────────────
   const html=`<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Commercial Mortgage Checklist${companyLabel?' \u2014 '+companyLabel:''}</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#0a0a0a;color:#e5e7eb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;padding:48px 24px 80px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.wrap{max-width:860px;margin:0 auto}
-/* Header */
-.eyebrow{color:#d4a017;text-transform:uppercase;letter-spacing:.15em;font-size:11px;font-weight:700;margin-bottom:6px}
-.title{font-size:26px;font-weight:300;color:#fff;margin-bottom:20px}
-.meta{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;font-size:13px;color:#9ca3af;margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid #1f2937}
-.lbl{color:#6b7280}.val{color:#fff;font-weight:500}.dim{color:#9ca3af}.pipe{color:#374151}
-/* Stats */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
-.stat-box{border:1px solid #1f2937;border-radius:10px;padding:18px 12px;text-align:center;background:#111827}
-.stat-num{font-size:38px;font-weight:700;line-height:1}.green{color:#16a34a}.red{color:#dc2626}.white{color:#fff}
-.stat-lbl{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.1em;margin-top:8px}
-/* Progress */
-.prog-track{background:#1f2937;border-radius:9999px;height:8px;overflow:hidden;margin-bottom:6px}
-.prog-fill{background:#d4a017;height:8px;border-radius:9999px}
-.prog-lbl{font-size:11px;color:#6b7280;text-align:right;margin-bottom:36px}
-/* Sections */
-.section{margin-bottom:28px}
-.sec-hdr{background:#d4a017;color:#0a0a0a;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;padding:8px 14px;border-radius:6px;margin-bottom:4px}
-.sub-hdr{font-size:10px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.1em;padding:10px 4px 4px;border-bottom:1px solid #1f2937;margin-bottom:2px}
-/* Items */
-.item{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:6px;margin-bottom:2px}
-.item.rcv{background:rgba(22,163,74,.06);border-left:3px solid #16a34a}
-.item.miss{background:rgba(255,255,255,.02);border-left:3px solid #374151}
-.icon{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;margin-top:1px}
-.rcv .icon{background:#16a34a;color:#fff}.miss .icon{border:1.5px solid #4b5563;color:#4b5563}
-.details{flex:1;min-width:0}
-.iname{font-size:13px;line-height:1.4}.rcv .iname{color:#f9fafb}.miss .iname{color:#9ca3af}
-.cmhc{font-size:9px;font-weight:700;background:rgba(212,160,23,.12);color:#d4a017;border:1px solid rgba(212,160,23,.3);border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:middle;text-transform:uppercase;letter-spacing:.08em}
-.notes{font-size:11px;color:#6b7280;margin-top:4px;font-style:italic}
-.file-tags{margin-top:5px;display:flex;flex-wrap:wrap;gap:4px}
-.file-tag{font-size:11px;background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.25);color:#d4a017;padding:2px 8px;border-radius:4px;white-space:nowrap}
-.badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0;align-self:flex-start;margin-top:2px}
-.badge-r{background:rgba(22,163,74,.12);color:#16a34a;border:1px solid rgba(22,163,74,.25)}
-.badge-m{background:rgba(255,255,255,.03);color:#6b7280;border:1px solid #374151}
-/* Footer */
-hr{border:none;border-top:1px solid #1f2937;margin:32px 0}
-.footer{text-align:center;color:#6b7280;font-size:12px;line-height:1.7}
-.footer .name{color:#e5e7eb;font-weight:600;font-size:14px}
-.footer .role{color:#9ca3af}
-.generated{font-size:10px;color:#374151;margin-top:12px}
-@media print{.item{break-inside:avoid}.section{break-inside:avoid}}
-</style>
+<script src="https://cdn.tailwindcss.com"><\/script>
+<script>
+tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']},colors:{brand:{gold:'#C9A24B',black:'#000000',dark:'#0a0a0a',gray:'#1a1a1a'}}}}}
+<\/script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>${customCSS}<\/style>
 </head>
-<body>
-<div class="wrap">
-  <p class="eyebrow">Commercial Mortgage</p>
-  <h1 class="title">Document Checklist &amp; Status</h1>
-  <div class="meta">
-    ${borrowerMeta}${propertyMeta}
-    <span><span class="lbl">Date:</span> <span class="val">${dateStr}</span></span>
+<body class="bg-brand-dark text-gray-300 font-sans antialiased min-h-screen">
+<div class="max-w-4xl mx-auto px-6 py-12">
+
+  <!-- Header -->
+  <div class="border-b border-brand-gold/30 pb-8 mb-10">
+    <div class="text-brand-gold uppercase tracking-[0.2em] text-xs font-bold mb-4">Document Requirements · Status Report</div>
+    <h1 class="text-3xl md:text-4xl font-light text-white leading-tight tracking-tight mb-2">
+      Commercial Mortgage —<br><span class="font-semibold">Document Checklist &amp; Status</span>
+    </h1>
+    <div class="mt-4 flex flex-wrap gap-4 text-sm text-gray-400 font-light">
+      ${borrowerMeta}${propertyMeta}
+      <span><span class="text-gray-500">Date:</span> <span class="text-white font-medium">${dateStr}</span></span>
+    </div>
   </div>
-  <div class="stats">
-    <div class="stat-box"><div class="stat-num white">${total}</div><div class="stat-lbl">Total Items</div></div>
-    <div class="stat-box"><div class="stat-num green">${rcvd}</div><div class="stat-lbl">Received</div></div>
-    <div class="stat-box"><div class="stat-num red">${miss}</div><div class="stat-lbl">Missing</div></div>
+
+  <!-- Stats -->
+  <div class="mb-12">
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <div class="bg-brand-gray border border-brand-gold/10 rounded-lg p-5 text-center">
+        <div class="text-3xl font-bold text-white mb-1">${total}</div>
+        <div class="text-xs text-gray-500 uppercase tracking-wider">Total Items</div>
+      </div>
+      <div class="bg-brand-gray border border-green-900/30 rounded-lg p-5 text-center">
+        <div class="text-3xl font-bold text-green-400 mb-1">${rcvd}</div>
+        <div class="text-xs text-gray-500 uppercase tracking-wider">Received</div>
+      </div>
+      <div class="bg-brand-gray border border-red-900/30 rounded-lg p-5 text-center">
+        <div class="text-3xl font-bold text-red-400 mb-1">${miss}</div>
+        <div class="text-xs text-gray-500 uppercase tracking-wider">Missing</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="flex-1 h-2 bg-brand-gray rounded-full overflow-hidden">
+        <div class="progress-bar-fill h-full rounded-full" style="width:${pct}%"></div>
+      </div>
+      <div class="text-brand-gold font-bold text-sm whitespace-nowrap">${pct}% Complete</div>
+    </div>
   </div>
-  <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
-  <div class="prog-lbl">${pct}% Complete</div>
+
+  <!-- Checklist -->
   ${checklistHtml}
-  <hr>
-  <div class="footer">
-    <div class="name">Nish Sivanathan</div>
-    <div class="role">Mortgage Agent Level 1 &middot; Director, Commercial Lending</div>
-    <div>416.895.0891 &middot; Nish@vinegroup.ca &middot; 555 Bloor St. E., Toronto, ON M4W 1J1</div>
-    <div class="generated">Generated ${dateStr}</div>
+
+  <!-- Footer -->
+  <div class="border-t border-brand-gold/20 pt-8 mt-4 text-center">
+    <div class="text-white font-semibold text-sm mb-1">Nish Sivanathan</div>
+    <div class="text-gray-500 text-xs">Mortgage Agent Level 1 &middot; Director, Commercial Lending</div>
+    <div class="text-gray-600 text-xs mt-1">416.895.0891 &middot; Nish@vinegroup.ca &middot; 555 Bloor St. E., Toronto, ON M4W 1J1</div>
+    <div class="text-gray-700 text-xs mt-4">Generated ${dateStr}</div>
   </div>
+
 </div>
 </body>
 </html>`;
