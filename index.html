@@ -538,11 +538,10 @@ function buildItem(item){
     ? `<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider badge-cmhc shrink-0">CMHC</span>` : '';
   const naBtn = `<button class="na-btn${st==='na'?' active':''}" data-na-id="${item.id}" title="${st==='na'?'Mark as applicable':'Mark as Not Applicable'}">${st==='na'?'✕ N/A':'N/A'}</button>`;
   const filesHtml = `<div class="files-list"></div>`;
-  const notesHtml = item.notes ? `<p class="note-text">${item.notes}</p>` : '';
   li.innerHTML=`<div class="flex items-start gap-3">${chk}<div class="flex-1">
     <div class="flex flex-wrap items-start gap-2">
       <span class="text-gray-300 text-sm font-light leading-snug flex-1">${item.name}</span>${badge}${cmhc}${naBtn}
-    </div>${filesHtml}${notesHtml}</div></div>`;
+    </div>${filesHtml}</div></div>`;
   return li;
 }
 
@@ -756,7 +755,6 @@ function exportHTML(forLender=false){
     const badge=`<span class="status-badge inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider badge-${st} shrink-0">${rcv?'Received':'Missing'}</span>`;
     const cmhc=item.cmhc?`<span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider badge-cmhc shrink-0">CMHC</span>`:'';
     const fileTags=files.length?`<div class="files-list">${files.map(f=>`<span class="file-tag">${hesc(f)}</span>`).join('')}</div>`:'';
-    const notes=item.notes?`<p class="note-text">${hesc(unesc(item.notes))}</p>`:'';
     return `<li class="rounded-md px-4 py-3 status-${st}">
   <div class="flex items-start gap-3">
     ${chk}
@@ -765,7 +763,7 @@ function exportHTML(forLender=false){
         <span class="text-gray-300 text-sm font-light leading-snug flex-1">${hesc(unesc(item.name))}</span>
         ${badge}${cmhc}
       </div>
-      ${fileTags}${notes}
+      ${fileTags}
     </div>
   </div>
 </li>`;
