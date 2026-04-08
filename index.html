@@ -429,45 +429,25 @@ function itemStatus(item){
 function parseCSV(text){
   text = text.replace(/^\uFEFF/,'');
   const out = new Map();
-  let sep = null;       // 'tab' | 'comma' | false (single-column)
   let headerDone = false;
 
   for(const raw of text.split(/\r?\n/)){
     const line = raw.trim();
     if(!line || line.startsWith('#')) continue;
 
-    // Step 1: Skip header row FIRST — header has no '.' anywhere (e.g. "Current File Name,New File Name")
+    // Skip optional header row (no '.' means it's a column label, not a filename)
     if(!headerDone){
       if(!line.includes('.')){
         headerDone = true;
         continue;
       }
       headerDone = true;
-      // First line has '.', it's a data line — fall through to sep detection
     }
 
-    // Step 2: Detect sep from first DATA line
-    // Check FIRST column (old filename always has '.') — new filename may have no extension
-    if(sep === null){
-      if(line.includes('\t')){
-        sep = 'tab';
-      } else {
-        const ci = line.indexOf(',');
-        sep = (ci > 0 && line.slice(0, ci).includes('.')) ? 'comma' : false;
-      }
-    }
-
-    // Step 3: Extract new filename (second column only)
-    let fname;
-    if(sep === 'tab')        fname = line.slice(line.indexOf('\t')+1).trim();
-    else if(sep === 'comma') fname = line.slice(line.indexOf(',')+1).trim();
-    else                     fname = line;
-
-    if(!fname) continue;
-    const low = fname.toLowerCase();
-    if(!out.has(low)) out.set(low, fname);
+    const low = line.toLowerCase();
+    if(!out.has(low)) out.set(low, line);
     const base = low.split(/[/\\]/).pop();
-    if(base !== low && !out.has(base)) out.set(base, fname);
+    if(base !== low && !out.has(base)) out.set(base, line);
   }
   return out;
 }
