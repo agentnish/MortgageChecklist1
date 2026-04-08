@@ -433,31 +433,32 @@ function parseCSV(text){
     const line = raw.trim();
     if(!line || line.startsWith('#')) continue;
 
-    // Detect separator from the very first non-empty line
+    // Step 1: Skip header row FIRST — header has no '.' anywhere (e.g. "Current File Name,New File Name")
+    if(!headerDone){
+      if(!line.includes('.')){
+        headerDone = true;
+        continue;
+      }
+      headerDone = true;
+      // First line has '.', it's a data line — fall through to sep detection
+    }
+
+    // Step 2: Detect sep from first DATA line
+    // Check FIRST column (old filename always has '.') — new filename may have no extension
     if(sep === null){
       if(line.includes('\t')){
         sep = 'tab';
       } else {
-        const ci = line.lastIndexOf(',');
-        sep = (ci > 0 && line.slice(ci+1).trim().includes('.')) ? 'comma' : false;
+        const ci = line.indexOf(',');
+        sep = (ci > 0 && line.slice(0, ci).includes('.')) ? 'comma' : false;
       }
     }
 
-    // Extract the new-filename column
+    // Step 3: Extract new filename (second column only)
     let fname;
-    if(sep === 'tab'){
-      fname = line.slice(line.indexOf('\t')+1).trim();
-    } else if(sep === 'comma'){
-      fname = line.slice(line.lastIndexOf(',')+1).trim();
-    } else {
-      fname = line;
-    }
-
-    // Skip the header row: first line whose extracted name has no extension and no ' - '
-    if(!headerDone){
-      headerDone = true;
-      if(!fname.includes('.') && !fname.includes(' - ')) continue;
-    }
+    if(sep === 'tab')        fname = line.slice(line.indexOf('\t')+1).trim();
+    else if(sep === 'comma') fname = line.slice(line.indexOf(',')+1).trim();
+    else                     fname = line;
 
     if(!fname) continue;
     const low = fname.toLowerCase();
