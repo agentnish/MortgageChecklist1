@@ -75,11 +75,11 @@
       Commercial Mortgage —<br><span class="font-semibold">Document Checklist &amp; Status</span>
     </h1>
     <div class="mt-4 flex flex-wrap gap-4 text-sm text-gray-400 font-light">
-      <span><span class="text-gray-500">Borrower:</span> <span class="text-white font-medium">1000617518 Ontario Inc</span> <span class="text-gray-600">(Sergey Burmistrov, principal)</span></span>
+      <span><span class="text-gray-500">Borrower:</span> <span id="hdr-company" class="text-gray-600 italic">Upload CSV</span> <span id="hdr-principal" class="text-gray-600"></span></span>
       <span class="text-gray-700">|</span>
-      <span><span class="text-gray-500">Property:</span> <span class="text-white font-medium">25 Templar Dr</span></span>
+      <span><span class="text-gray-500">Property:</span> <span id="hdr-property" class="text-gray-600 italic">Upload CSV</span></span>
       <span class="text-gray-700">|</span>
-      <span><span class="text-gray-500">Date:</span> <span class="text-white font-medium">2026-04-04</span></span>
+      <span><span class="text-gray-500">Date:</span> <span id="hdr-date" class="text-white font-medium"></span></span>
     </div>
   </div>
 
@@ -405,7 +405,9 @@ const ITEM_MAP = new Map(CHECKLIST.map(i => [i.id, i]));
 
 // ─── State ────────────────────────────────────────────────────────────────────
 // itemFiles: Map<itemId, string[]> — original-case filenames matched from CSV
-const state = { itemFiles: new Map(), loaded: false, na: new Set(), hideNa: false };
+// dealInfo: extracted from CSV naming convention (Category - Title - PrimaryName - ...)
+const state = { itemFiles: new Map(), loaded: false, na: new Set(), hideNa: false,
+                dealInfo: { company:'', principal:'', property:'' } };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const CHECK_SVG = `<svg class="chk text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
@@ -606,6 +608,39 @@ function toast(msg,type='success'){
   setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); },3500);
 }
 
+// ─── Deal Info Extraction ─────────────────────────────────────────────────────
+// Parses the naming convention "Category - Document Title - Primary Name - ..."
+// Company  = Corporate primary name most seen
+// Principal = Personal primary name with most files
+// Property  = Property primary name most seen
+function extractDealInfo(fileMap){
+  const counts = { corporate: new Map(), personal: new Map(), property: new Map() };
+  for(const [low, orig] of fileMap){
+    if(low.includes('/')||low.includes('\\')) continue;
+    const noExt = orig.replace(/\.[^.]+$/, '');
+    const parts = noExt.split(' - ');
+    if(parts.length < 3) continue;
+    const cat = parts[0].trim().toLowerCase();
+    const name = parts[2].trim();
+    if(!name || /^\d{4}(-\d{2})?$/.test(name)) continue; // skip date-like tokens
+    if(counts[cat]) counts[cat].set(name, (counts[cat].get(name)||0)+1);
+  }
+  function top(m){ let best='',n=0; for(const [k,v] of m) if(v>n){best=k;n=v;} return best; }
+  return { company: top(counts.corporate), principal: top(counts.personal), property: top(counts.property) };
+}
+
+function applyDealInfo(info){
+  state.dealInfo = info;
+  const { company, principal, property } = info;
+  const el = id => document.getElementById(id);
+  const cEl=el('hdr-company'), pEl=el('hdr-principal'), prEl=el('hdr-property');
+  if(cEl){ cEl.textContent=company||'Upload CSV'; cEl.className=company?'text-white font-medium':'text-gray-600 italic'; }
+  if(pEl){ pEl.textContent=principal?`(${principal}, principal)`:''; }
+  if(prEl){ prEl.textContent=property||'Upload CSV'; prEl.className=property?'text-white font-medium':'text-gray-600 italic'; }
+  if(company) document.title=`Commercial Mortgage Checklist — ${company}`;
+  else document.title='Commercial Mortgage Checklist';
+}
+
 // ─── CSV Processing ───────────────────────────────────────────────────────────
 function processCSV(text,fname){
   const parsed=parseCSV(text);
@@ -632,6 +667,7 @@ function processCSV(text,fname){
   }
 
   state.itemFiles=newItemFiles; state.loaded=true;
+  applyDealInfo(extractDealInfo(parsed));
   updateUI();
 
   const itemsMatched=CHECKLIST.filter(item=>newItemFiles.get(item.id).length>0).length;
@@ -646,6 +682,7 @@ function processCSV(text,fname){
 
 function resetCSV(){
   state.itemFiles=new Map(); state.loaded=false;
+  applyDealInfo({company:'',principal:'',property:''});
   updateUI();
   document.getElementById('upload-status').classList.add('hidden');
   document.getElementById('csv-file-input').value='';
@@ -654,6 +691,7 @@ function resetCSV(){
 
 function resetAll(){
   state.itemFiles=new Map(); state.loaded=false; state.na=new Set(); state.hideNa=false;
+  applyDealInfo({company:'',principal:'',property:''});
   document.getElementById('upload-status').classList.add('hidden');
   document.getElementById('csv-file-input').value='';
   document.getElementById('hide-na-toggle').checked=false;
@@ -713,14 +751,18 @@ function exportPDF(){
   doc.text('Generated: '+new Date().toLocaleDateString('en-CA'), PW-M, 17, {align:'right'});
   y = 30;
 
-  // Deal info
-  const borrower = document.querySelector('h1')?.nextElementSibling?.textContent
-    || '1000617518 Ontario Inc';
+  // Deal info from extracted CSV data
+  const { company, principal, property } = state.dealInfo;
+  const companyLabel  = company  || 'Unknown Borrower';
+  const principalLabel= principal|| '';
+  const propertyLabel = property || 'Unknown Property';
   doc.setFontSize(13); doc.setFont('helvetica','bold'); tc(...BLACK);
-  doc.text('1000617518 Ontario Inc', M, y); y+=6;
+  doc.text(companyLabel, M, y); y+=6;
   doc.setFontSize(7.5); doc.setFont('helvetica','normal'); tc(...GRAY);
-  doc.text('Borrower: 1000617518 Ontario Inc  (Sergey Burmistrov, principal)   ·   Property: 25 Templar Dr', M, y);
-  y += 11;
+  const borrowerLine = 'Borrower: '+companyLabel+(principalLabel?'  ('+principalLabel+', principal)':'')
+                       +'   ·   Property: '+propertyLabel;
+  const borrowerLines = doc.splitTextToSize(borrowerLine, CW);
+  doc.text(borrowerLines, M, y); y += borrowerLines.length*4.5 + 6;
 
   // ── Progress stats ────────────────────────────────────────────────────────
   let rcvd=0, naCount=0;
@@ -843,12 +885,17 @@ function exportPDF(){
 
   // ── Save ──────────────────────────────────────────────────────────────────
   const dateStr=new Date().toISOString().slice(0,10);
-  doc.save(`Mortgage-Checklist-1000617518-Ontario-Inc-${dateStr}.pdf`);
+  const safeCompany=(state.dealInfo.company||'Unknown').replace(/[^a-zA-Z0-9 ]/g,'').replace(/\s+/g,'-');
+  doc.save(`Mortgage-Checklist-${safeCompany}-${dateStr}.pdf`);
   toast('PDF exported successfully.','success');
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
+  // Set today's date in header
+  const dateEl=document.getElementById('hdr-date');
+  if(dateEl) dateEl.textContent=new Date().toLocaleDateString('en-CA');
+
   renderAll();
   updateUI();
 
