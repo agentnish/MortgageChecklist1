@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Commercial Mortgage Checklist — 1000617518 Ontario Inc</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -103,16 +102,16 @@
         </label>
       </div>
 
-      <!-- Toolbar: Reset All + Export PDF + Hide N/A -->
+      <!-- Toolbar: Reset All + Generate Page + Hide N/A -->
       <div class="flex items-center justify-between mb-4">
         <button id="reset-all-btn" class="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-400 border border-white/10 hover:border-red-900/50 px-3 py-1.5 rounded-lg transition-colors">
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           Reset All
         </button>
         <div class="flex items-center gap-3">
-          <button id="export-pdf-btn" class="flex items-center gap-1.5 text-xs font-semibold text-brand-black bg-brand-gold hover:bg-yellow-400 px-3 py-1.5 rounded-lg transition-colors">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-            Export PDF
+          <button id="export-html-btn" class="flex items-center gap-1.5 text-xs font-semibold text-brand-black bg-brand-gold hover:bg-yellow-400 px-3 py-1.5 rounded-lg transition-colors">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            Generate Page
           </button>
           <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
             <input type="checkbox" id="hide-na-toggle" class="accent-yellow-500 w-3.5 h-3.5">
@@ -717,99 +716,24 @@ function resetAll(){
   toast('Reset — all statuses and N/A marks cleared.','warning');
 }
 
-// ─── PDF Export ───────────────────────────────────────────────────────────────
-function exportPDF(){
-  if(!window.jspdf){ toast('PDF library not loaded yet — try again in a moment.','warning'); return; }
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit:'mm', format:'letter', orientation:'portrait' });
-
-  const PW=215.9, PH=279.4, M=18, CW=PW-2*M;
-  let y=M, pageNum=1;
-
-  // ── Colour palette ────────────────────────────────────────────────────────
-  const GOLD=[201,162,75], BLACK=[10,10,10], WHITE=[255,255,255];
-  const GREEN=[22,163,74], RED=[220,38,38];
-  const GRAY=[107,114,128], LGRAY=[209,213,219], DKGRAY=[55,65,81];
-
-  function tc(...c){ doc.setTextColor(...c); }
-  function fc(...c){ doc.setFillColor(...c); }
-  function dc(...c){ doc.setDrawColor(...c); }
-
-  // Strip HTML entities from item name/notes strings
-  function unesc(s){
-    return (s||'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
-                  .replace(/&nbsp;/g,' ').replace(/&#39;/g,"'");
-  }
-
-  // ── Running page header (subsequent pages only) ───────────────────────────
-  function pageHeader(){
-    dc(...GOLD); doc.setLineWidth(0.4); doc.line(M,9,PW-M,9);
-    doc.setFontSize(6.5); doc.setFont('helvetica','normal'); tc(...GRAY);
-    doc.text('Commercial Mortgage — Document Checklist  ·  Confidential', M, 7.5);
-    doc.text('Page '+pageNum, PW-M, 7.5, {align:'right'});
-    y = 16;
-  }
-
-  function newPage(){
-    doc.addPage(); pageNum++;
-    pageHeader();
-  }
-
-  function guard(need=8){
-    if(y+need > PH-M-8) newPage();
-  }
-
-  // ── Page 1: cover header ──────────────────────────────────────────────────
-  fc(...GOLD); doc.rect(0,0,PW,22,'F');
-  doc.setFontSize(11); doc.setFont('helvetica','bold'); tc(...BLACK);
-  doc.text('COMMERCIAL MORTGAGE — DOCUMENT CHECKLIST', M, 11);
-  doc.setFontSize(7.5); doc.setFont('helvetica','normal');
-  doc.text('Status Report  ·  Confidential', PW-M, 11, {align:'right'});
-  doc.setFontSize(7); tc(...DKGRAY);
-  doc.text('Generated: '+new Date().toLocaleDateString('en-CA'), PW-M, 17, {align:'right'});
-  y = 30;
-
-  // Deal info from extracted CSV data
+// ─── Static Page Export ───────────────────────────────────────────────────────
+function exportHTML(){
   const { company, principal, property } = state.dealInfo;
-  const companyLabel  = company  || 'Unknown Borrower';
+  const companyLabel  = company  || '';
   const principalLabel= principal|| '';
-  const propertyLabel = property || 'Unknown Property';
-  doc.setFontSize(13); doc.setFont('helvetica','bold'); tc(...BLACK);
-  doc.text(companyLabel, M, y); y+=6;
-  doc.setFontSize(7.5); doc.setFont('helvetica','normal'); tc(...GRAY);
-  const borrowerLine = 'Borrower: '+companyLabel+(principalLabel?'  ('+principalLabel+', principal)':'')
-                       +'   ·   Property: '+propertyLabel;
-  const borrowerLines = doc.splitTextToSize(borrowerLine, CW);
-  doc.text(borrowerLines, M, y); y += borrowerLines.length*4.5 + 6;
+  const propertyLabel = property || '';
+  const dateStr = new Date().toLocaleDateString('en-CA');
 
-  // ── Progress stats ────────────────────────────────────────────────────────
+  function unesc(s){ return (s||'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/&#39;/g,"'"); }
+  function hesc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ── Stats ────────────────────────────────────────────────────────────────
   let rcvd=0, naCount=0;
   CHECKLIST.forEach(item=>{ const s=itemStatus(item); if(s==='na') naCount++; else if(s==='received') rcvd++; });
   const total=CHECKLIST.length-naCount, miss=total-rcvd;
   const pct=total>0?Math.round(rcvd/total*100):0;
 
-  const bw=(CW-8)/3, bh=15;
-  [[total,'TOTAL ITEMS',BLACK],[rcvd,'RECEIVED',GREEN],[miss,'MISSING',RED]].forEach(([v,lbl,col],i)=>{
-    const bx=M+i*(bw+4);
-    dc(...LGRAY); doc.setLineWidth(0.3); doc.roundedRect(bx,y,bw,bh,1.5,1.5);
-    doc.setFontSize(18); doc.setFont('helvetica','bold'); tc(...col);
-    doc.text(String(v), bx+bw/2, y+10, {align:'center'});
-    doc.setFontSize(6); doc.setFont('helvetica','normal'); tc(...GRAY);
-    doc.text(lbl, bx+bw/2, y+14, {align:'center'});
-  });
-  y += bh+6;
-
-  // Progress bar
-  fc(...LGRAY); doc.roundedRect(M,y,CW,4,1,1,'F');
-  if(pct>0){ fc(...GOLD); doc.roundedRect(M,y,CW*pct/100,4,1,1,'F'); }
-  doc.setFontSize(7); tc(...GRAY);
-  doc.text(pct+'% Complete', PW-M, y+3.2, {align:'right'});
-  y += 13;
-
-  // Divider
-  dc(...LGRAY); doc.setLineWidth(0.25); doc.line(M,y,PW-M,y); y+=7;
-
-  // ── Checklist ─────────────────────────────────────────────────────────────
+  // ── Group sections ───────────────────────────────────────────────────────
   const sections=[], sMap=new Map();
   for(const item of CHECKLIST){
     if(!sMap.has(item.section)){ const s={section:item.section,subs:new Map()}; sMap.set(item.section,s); sections.push(s); }
@@ -818,94 +742,128 @@ function exportPDF(){
     s.subs.get(k).push(item);
   }
 
+  // ── Build checklist HTML ─────────────────────────────────────────────────
+  let checklistHtml='';
   for(const sec of sections){
-    // Filter: skip sections where ALL non-na items are filtered
-    const allItems=[...sec.subs.values()].flat().filter(i=>itemStatus(i)!=='na');
-    if(allItems.length===0) continue;
-
-    guard(14);
-    // Section header bar
-    fc(...GOLD); doc.rect(M,y,CW,7.5,'F');
-    doc.setFontSize(7.5); doc.setFont('helvetica','bold'); tc(...BLACK);
-    doc.text(unesc(sec.section), M+3, y+5.2);
-    y += 11;
-
-    for(const [subKey,items] of sec.subs){
+    const secItems=[...sec.subs.values()].flat().filter(i=>itemStatus(i)!=='na');
+    if(!secItems.length) continue;
+    checklistHtml+=`<div class="section"><div class="sec-hdr">${hesc(unesc(sec.section))}</div>`;
+    for(const [sub,items] of sec.subs){
       const vis=items.filter(i=>itemStatus(i)!=='na');
-      if(vis.length===0) continue;
-
-      if(subKey!=='__'){
-        guard(9);
-        doc.setFontSize(7); doc.setFont('helvetica','bold'); tc(...DKGRAY);
-        doc.text(unesc(subKey).toUpperCase(), M+2, y); y+=6;
-      }
-
+      if(!vis.length) continue;
+      if(sub!=='__') checklistHtml+=`<div class="sub-hdr">${hesc(unesc(sub))}</div>`;
       for(const item of vis){
         const st=itemStatus(item);
-        const isRcvd=st==='received';
+        const rcv=st==='received';
         const files=state.itemFiles.get(item.id)||[];
-        const nameText=unesc(item.name);
-        const nameLines=doc.splitTextToSize(nameText, CW-13);
-        const itemH=nameLines.length*4.2 + (isRcvd&&files.length>0?files.length*3.8:0) + (item.notes?4:0) + 4;
-        guard(itemH);
-
-        const ix=M+2;
-        // Status indicator (4×4 box)
-        if(isRcvd){
-          fc(...GREEN); doc.rect(ix,y-3.8,4.2,4.2,'F');
-          doc.setFontSize(7); doc.setFont('helvetica','bold'); tc(...WHITE);
-          doc.text('✓', ix+0.7, y-0.4);
-        } else {
-          dc(...RED); doc.setLineWidth(0.5); doc.rect(ix,y-3.8,4.2,4.2);
-          doc.setFontSize(7); doc.setFont('helvetica','bold'); tc(...RED);
-          doc.text('–', ix+1.1, y-0.4);
-        }
-
-        // Item name
-        doc.setFontSize(7.5); doc.setFont('helvetica','normal');
-        tc(...(isRcvd?BLACK:DKGRAY));
-        doc.text(nameLines, M+8.5, y);
-        y += nameLines.length*4.2;
-
-        // Filenames (received items only)
-        if(isRcvd && files.length>0){
-          files.forEach(f=>{
-            guard(4);
-            doc.setFontSize(6); doc.setFont('helvetica','italic'); tc(...GRAY);
-            const fLines=doc.splitTextToSize('↳ '+f, CW-16);
-            doc.text(fLines, M+11, y); y+=fLines.length*3.8;
-          });
-        }
-
-        // Notes
-        if(item.notes){
-          guard(4);
-          doc.setFontSize(6); doc.setFont('helvetica','italic'); tc(...GRAY);
-          const nLines=doc.splitTextToSize('Note: '+unesc(item.notes), CW-13);
-          doc.text(nLines, M+8.5, y); y+=nLines.length*3.5;
-        }
-
-        y+=2.5; // row gap
+        const fileTags=rcv&&files.length?`<div class="file-tags">${files.map(f=>`<span class="file-tag">${hesc(f)}</span>`).join('')}</div>`:'';
+        const notes=item.notes?`<p class="notes">${hesc(unesc(item.notes))}</p>`:'';
+        const cmhc=item.cmhc?`<span class="cmhc">CMHC</span>`:'';
+        checklistHtml+=`<div class="item ${rcv?'rcv':'miss'}">
+  <div class="icon">${rcv?'✓':'–'}</div>
+  <div class="details"><span class="iname">${hesc(unesc(item.name))}</span>${cmhc}${notes}${fileTags}</div>
+  <div class="badge ${rcv?'badge-r':'badge-m'}">${rcv?'Received':'Missing'}</div>
+</div>`;
       }
-      y+=3; // subsection gap
     }
-    y+=4; // section gap
+    checklistHtml+=`</div>`;
   }
 
-  // ── Footer ────────────────────────────────────────────────────────────────
-  guard(16);
-  dc(...LGRAY); doc.setLineWidth(0.25); doc.line(M,y,PW-M,y); y+=5;
-  doc.setFontSize(9); doc.setFont('helvetica','bold'); tc(...BLACK);
-  doc.text('Nish Sivanathan', M, y); y+=5;
-  doc.setFontSize(7.5); doc.setFont('helvetica','normal'); tc(...GRAY);
-  doc.text('Mortgage Agent Level 1  ·  Director, Commercial Lending', M, y); y+=4.5;
-  doc.text('416.895.0891  ·  Nish@vinegroup.ca  ·  555 Bloor St. E., Toronto, ON M4W 1J1', M, y);
+  // ── Meta strings ─────────────────────────────────────────────────────────
+  const borrowerMeta = companyLabel
+    ? `<span><span class="lbl">Borrower:</span> <span class="val">${hesc(companyLabel)}</span>${principalLabel?` <span class="dim">(${hesc(principalLabel)}, principal)</span>`:''}</span><span class="pipe">|</span>`
+    : '';
+  const propertyMeta = propertyLabel
+    ? `<span><span class="lbl">Property:</span> <span class="val">${hesc(propertyLabel)}</span></span><span class="pipe">|</span>`
+    : '';
 
-  // ── Save ──────────────────────────────────────────────────────────────────
-  const dateStr=new Date().toISOString().slice(0,10);
-  const safeCompany=(state.dealInfo.company||'Unknown').replace(/[^a-zA-Z0-9 ]/g,'').replace(/\s+/g,'-');
-  doc.save(`Mortgage-Checklist-${safeCompany}-${dateStr}.pdf`);
-  toast('PDF exported successfully.','success');
+  // ── Full HTML ─────────────────────────────────────────────────────────────
+  const html=`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Commercial Mortgage Checklist${companyLabel?' \u2014 '+companyLabel:''}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;color:#e5e7eb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;padding:48px 24px 80px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.wrap{max-width:860px;margin:0 auto}
+/* Header */
+.eyebrow{color:#d4a017;text-transform:uppercase;letter-spacing:.15em;font-size:11px;font-weight:700;margin-bottom:6px}
+.title{font-size:26px;font-weight:300;color:#fff;margin-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;font-size:13px;color:#9ca3af;margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid #1f2937}
+.lbl{color:#6b7280}.val{color:#fff;font-weight:500}.dim{color:#9ca3af}.pipe{color:#374151}
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.stat-box{border:1px solid #1f2937;border-radius:10px;padding:18px 12px;text-align:center;background:#111827}
+.stat-num{font-size:38px;font-weight:700;line-height:1}.green{color:#16a34a}.red{color:#dc2626}.white{color:#fff}
+.stat-lbl{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.1em;margin-top:8px}
+/* Progress */
+.prog-track{background:#1f2937;border-radius:9999px;height:8px;overflow:hidden;margin-bottom:6px}
+.prog-fill{background:#d4a017;height:8px;border-radius:9999px}
+.prog-lbl{font-size:11px;color:#6b7280;text-align:right;margin-bottom:36px}
+/* Sections */
+.section{margin-bottom:28px}
+.sec-hdr{background:#d4a017;color:#0a0a0a;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;padding:8px 14px;border-radius:6px;margin-bottom:4px}
+.sub-hdr{font-size:10px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.1em;padding:10px 4px 4px;border-bottom:1px solid #1f2937;margin-bottom:2px}
+/* Items */
+.item{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:6px;margin-bottom:2px}
+.item.rcv{background:rgba(22,163,74,.06);border-left:3px solid #16a34a}
+.item.miss{background:rgba(255,255,255,.02);border-left:3px solid #374151}
+.icon{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;margin-top:1px}
+.rcv .icon{background:#16a34a;color:#fff}.miss .icon{border:1.5px solid #4b5563;color:#4b5563}
+.details{flex:1;min-width:0}
+.iname{font-size:13px;line-height:1.4}.rcv .iname{color:#f9fafb}.miss .iname{color:#9ca3af}
+.cmhc{font-size:9px;font-weight:700;background:rgba(212,160,23,.12);color:#d4a017;border:1px solid rgba(212,160,23,.3);border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:middle;text-transform:uppercase;letter-spacing:.08em}
+.notes{font-size:11px;color:#6b7280;margin-top:4px;font-style:italic}
+.file-tags{margin-top:5px;display:flex;flex-wrap:wrap;gap:4px}
+.file-tag{font-size:11px;background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.25);color:#d4a017;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;white-space:nowrap;flex-shrink:0;align-self:flex-start;margin-top:2px}
+.badge-r{background:rgba(22,163,74,.12);color:#16a34a;border:1px solid rgba(22,163,74,.25)}
+.badge-m{background:rgba(255,255,255,.03);color:#6b7280;border:1px solid #374151}
+/* Footer */
+hr{border:none;border-top:1px solid #1f2937;margin:32px 0}
+.footer{text-align:center;color:#6b7280;font-size:12px;line-height:1.7}
+.footer .name{color:#e5e7eb;font-weight:600;font-size:14px}
+.footer .role{color:#9ca3af}
+.generated{font-size:10px;color:#374151;margin-top:12px}
+@media print{.item{break-inside:avoid}.section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Commercial Mortgage</p>
+  <h1 class="title">Document Checklist &amp; Status</h1>
+  <div class="meta">
+    ${borrowerMeta}${propertyMeta}
+    <span><span class="lbl">Date:</span> <span class="val">${dateStr}</span></span>
+  </div>
+  <div class="stats">
+    <div class="stat-box"><div class="stat-num white">${total}</div><div class="stat-lbl">Total Items</div></div>
+    <div class="stat-box"><div class="stat-num green">${rcvd}</div><div class="stat-lbl">Received</div></div>
+    <div class="stat-box"><div class="stat-num red">${miss}</div><div class="stat-lbl">Missing</div></div>
+  </div>
+  <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+  <div class="prog-lbl">${pct}% Complete</div>
+  ${checklistHtml}
+  <hr>
+  <div class="footer">
+    <div class="name">Nish Sivanathan</div>
+    <div class="role">Mortgage Agent Level 1 &middot; Director, Commercial Lending</div>
+    <div>416.895.0891 &middot; Nish@vinegroup.ca &middot; 555 Bloor St. E., Toronto, ON M4W 1J1</div>
+    <div class="generated">Generated ${dateStr}</div>
+  </div>
+</div>
+</body>
+</html>`;
+
+  const safeCompany=(companyLabel||'Checklist').replace(/[^a-zA-Z0-9 ]/g,'').replace(/\s+/g,'-');
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`Mortgage-Checklist-${safeCompany}-${dateStr}.html`;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },100);
+  toast('Static page generated — check your downloads.','success');
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
@@ -950,7 +908,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   document.getElementById('reset-btn').addEventListener('click',resetCSV);
   document.getElementById('reset-all-btn').addEventListener('click',resetAll);
-  document.getElementById('export-pdf-btn').addEventListener('click',exportPDF);
+  document.getElementById('export-html-btn').addEventListener('click',exportHTML);
   document.getElementById('hide-na-toggle').addEventListener('change',e=>{ state.hideNa=e.target.checked; updateUI(); });
   document.getElementById('checklist-container').addEventListener('click',e=>{
     const btn=e.target.closest('[data-na-id]');
