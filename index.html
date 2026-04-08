@@ -426,15 +426,14 @@ function itemStatus(item){
 function parseCSV(text){
   text = text.replace(/^\uFEFF/,'');
   const out = new Map();
-  let first = true;
-  let sep = null; // null=undetected; 'tab', 'comma', or false=single-column
+  let sep = null;       // 'tab' | 'comma' | false (single-column)
+  let headerDone = false;
+
   for(const raw of text.split(/\r?\n/)){
     const line = raw.trim();
     if(!line || line.startsWith('#')) continue;
-    if(first && !line.includes('.') && !line.includes('\t')){ first=false; continue; } // skip header
-    first = false;
-    // Auto-detect two-column AI rename CSV
-    // Supports: tab-separated (most AI tools) or comma-separated with extension in second col
+
+    // Detect separator from the very first non-empty line
     if(sep === null){
       if(line.includes('\t')){
         sep = 'tab';
@@ -443,20 +442,28 @@ function parseCSV(text){
         sep = (ci > 0 && line.slice(ci+1).trim().includes('.')) ? 'comma' : false;
       }
     }
+
+    // Extract the new-filename column
     let fname;
     if(sep === 'tab'){
-      const ti = line.indexOf('\t');
-      fname = line.slice(ti+1).trim();
+      fname = line.slice(line.indexOf('\t')+1).trim();
     } else if(sep === 'comma'){
       fname = line.slice(line.lastIndexOf(',')+1).trim();
     } else {
       fname = line;
     }
-    if(!fname) continue; // skip rows where new filename column is empty
+
+    // Skip the header row: first line whose extracted name has no extension and no ' - '
+    if(!headerDone){
+      headerDone = true;
+      if(!fname.includes('.') && !fname.includes(' - ')) continue;
+    }
+
+    if(!fname) continue;
     const low = fname.toLowerCase();
     if(!out.has(low)) out.set(low, fname);
     const base = low.split(/[/\\]/).pop();
-    if(base!==low && !out.has(base)) out.set(base, fname);
+    if(base !== low && !out.has(base)) out.set(base, fname);
   }
   return out;
 }
@@ -638,8 +645,11 @@ function extractDealInfo(fileMap){
     const parts = noExt.split(' - ');
     if(parts.length < 3) continue;
     const cat = parts[0].trim().toLowerCase();
+    const docType = parts[1].trim().toLowerCase();
     const name = parts[2].trim();
     if(!name || /^\d{4}(-\d{2})?$/.test(name)) continue; // skip date-like tokens
+    // Invoices reference billing/project addresses, not the mortgage subject property — exclude
+    if(cat === 'property' && docType === 'invoice') continue;
     if(counts[cat]) counts[cat].set(name, (counts[cat].get(name)||0)+1);
   }
   function top(m){ let best='',n=0; for(const [k,v] of m) if(v>n){best=k;n=v;} return best; }
